@@ -50,7 +50,7 @@
           <div class="table-wrapper poem-library-wrapper">
             <table class="poem-library-table">
               <colgroup>
-                <col style="width:64px" />
+                <col style="width:58px" />
                 <col />
               </colgroup>
               <thead>

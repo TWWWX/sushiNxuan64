@@ -269,7 +269,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   box-sizing: border-box;
 }
 
-/* 全文按钮 & 展开行：按钮以绝对定位填满整格（与淘汰按钮外框视觉一致，不出现半格空白） */
+/* 全文按钮 & 展开行：按钮以绝对定位填满整格；宽=原文/收起的五分之四（约58px），与淘汰按钮宽度统一 */
 .expand-cell {
   padding: 0 !important;
   background: transparent !important;
@@ -277,7 +277,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   border: 1px solid #dde7dd;
   vertical-align: top;
   position: relative;
-  width: 72px;
+  width: 58px;
 }
 .expand-empty {
   padding: 0 !important;
@@ -292,8 +292,8 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   align-items: center;
   justify-content: center;
   padding: 0;
-  font-size: 13px;
-  line-height: 1.2;
+  font-size: 12px;
+  line-height: 1.1;
   color: #faf9f6;
   background: #8a9a90;
   border: none;
@@ -301,7 +301,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   cursor: pointer;
   font-family: inherit;
   font-weight: 600;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   transition: background 0.15s;
   user-select: none;
   box-sizing: border-box;
@@ -368,15 +368,15 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   background: transparent;
 }
 .swipe-action {
-  width: 80px;
+  width: 58px;
   background: #c49492;
   color: #faf9f6;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
@@ -396,10 +396,10 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 }
 .result-table th { font-size: 12px; padding: 5px 4px; white-space: nowrap; }
 .result-cell {
-  padding: 3px 4px;
-  font-size: 12px;
-  vertical-align: top;
-  height: 66px;
+  padding: 1px 2px;
+  font-size: 8px;
+  vertical-align: middle;
+  height: 22px;
 }
 .result-cell .poem-title,
 .result-cell .poem-content {
@@ -409,13 +409,13 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   max-width: 100%;
   display: block;
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.05;
 }
-.result-cell .poem-title { font-size: 11px; margin-bottom: 2px; }
-.result-cell .poem-content { font-size: 10px; color: #5c7a5c; }
+.result-cell .poem-title { font-size: 9px; margin-bottom: 0; }
+.result-cell .poem-content { font-size: 8px; color: #5c7a5c; }
 .result-idx {
   color: #b8cdb8;
-  font-size: 10px;
+  font-size: 7px;
   display: block;
   text-align: center;
 }
@@ -470,9 +470,9 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   }
   .result-table { min-width: 720px; }
   .result-table colgroup col { min-width: 180px; }
-  .result-cell { height: 82px; padding: 2px 3px; }
-  .result-cell .poem-title { font-size: 10px; }
-  .result-cell .poem-content { font-size: 9px; }
+  .result-cell { height: 27px; padding: 1px 2px; vertical-align: middle; }
+  .result-cell .poem-title { font-size: 9px; line-height: 1.05; margin-bottom: 0; }
+  .result-cell .poem-content { font-size: 8px; line-height: 1.05; }
 
   th { font-size: 11px; padding: 3px 4px; }
   td { font-size: 11px; padding: 3px 4px; }
@@ -480,8 +480,9 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .poem-content { font-size: 10px; }
   .table-page-title { font-size: 16px; letter-spacing: 1px; }
 
-  .expand-btn { min-width: 40px; font-size: 10px; padding: 1px 4px; }
-  .expand-cell { width: 52px; }
+  .expand-btn { font-size: 10px; letter-spacing: 0; }
+  .expand-cell { width: 42px; }
+  .swipe-action { width: 42px; font-size: 10px; letter-spacing: 0; }
   .expand-content { font-size: 10px; line-height: 1.7; }
 }
 
@@ -521,9 +522,9 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .n64-col-main   { grid-column: 2; grid-row: 1; order: initial; }
   .n64-col-result { grid-column: 3; grid-row: 1; order: initial; }
 
-  .result-cell { height: 112px; padding: 5px 6px; }
-  .result-cell .poem-title { font-size: 12px; }
-  .result-cell .poem-content { font-size: 11px; }
+  .result-cell { height: 37px; padding: 1px 3px; vertical-align: middle; }
+  .result-cell .poem-title { font-size: 10px; line-height: 1.05; margin-bottom: 0; }
+  .result-cell .poem-content { font-size: 9px; line-height: 1.05; }
 }
 
 /* ==================== 700px 小屏进一步压缩 ==================== */
@@ -555,9 +556,9 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 
   .result-table { min-width: 640px; }
   .result-table colgroup col { min-width: 160px; }
-  .result-cell { height: 78px; padding: 1px 2px; }
-  .result-cell .poem-title { font-size: 9px; }
-  .result-cell .poem-content { font-size: 8px; }
+  .result-cell { height: 26px; padding: 1px 2px; vertical-align: middle; }
+  .result-cell .poem-title { font-size: 8px; line-height: 1.05; margin-bottom: 0; }
+  .result-cell .poem-content { font-size: 7px; line-height: 1.05; }
 
   .poem-library-wrapper,
   .result-wrapper,
