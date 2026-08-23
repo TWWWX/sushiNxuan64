@@ -220,8 +220,10 @@
       <div class="auth-box">
         <h3 class="auth-title">请证明你是人类</h3>
         <p class="auth-desc">
-          为了防止人机刷票，请写一段关于「自己与苏轼」的话以证明您是人类，我们将根据您的自证决定是否采纳您提交的数据上榜。
-          注意：若使用AI生成，一律不予采纳。
+          为了防止人机刷票，请写一段关于「自己与苏轼」的话以证明您是真实的人类，我们将根据您的自证决定是否采纳您提交的数据上榜。
+          <br>
+          <br>
+          <strong>注意：</strong>注意：若使用AI生成，一律不予采纳。
         </p>
         <textarea
           v-model="authText"
@@ -435,6 +437,7 @@ export default {
     window.addEventListener('hashchange', this.handleHashChange);
     window.addEventListener('resize', this.forceRerender);
     this.refreshRandomPoem();
+    this._ensureDeviceId(); // 页面加载即进行双重备份同步/恢复/生成
   },
   beforeDestroy() {
     window.removeEventListener('hashchange', this.handleHashChange);
@@ -617,6 +620,72 @@ export default {
         String(d.getHours()).padStart(2, '0') +
         String(d.getMinutes()).padStart(2, '0');
     },
+    _uuidShort() {
+      const bytes = new Uint8Array(8);
+      if (crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+      else for (let i = 0; i < 8; i++) bytes[i] = Math.floor(Math.random() * 256);
+      let hex = '';
+      for (let i = 0; i < bytes.length; i++) hex += bytes[i].toString(16).padStart(2, '0');
+      return hex;
+    },
+    _setCookie(name, value, days) {
+      try {
+        const d = new Date();
+        d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+        const secure = location.protocol === 'https:' ? 'Secure;' : '';
+        document.cookie =
+          encodeURIComponent(name) + '=' + encodeURIComponent(value) +
+          ';expires=' + d.toUTCString() +
+          ';path=/' +
+          (secure ? ';' + secure : '') +
+          ';SameSite=Lax';
+      } catch (e) {}
+    },
+    _getCookie(name) {
+      try {
+        const key = encodeURIComponent(name) + '=';
+        const parts = document.cookie ? document.cookie.split(';') : [];
+        for (let p of parts) {
+          p = p.trim();
+          if (p.indexOf(key) === 0) return decodeURIComponent(p.slice(key.length));
+        }
+      } catch (e) {}
+      return '';
+    },
+    // 双重备份：Cookie + LocalStorage
+    // 读取时优先 LocalStorage；其缺失则用 Cookie 恢复并回写 LocalStorage；Cookie 缺失则用 LocalStorage 回写 Cookie；均缺失时生成新 ID 并写入两处。
+    _ensureDeviceId() {
+      const LS_KEY = 'shiwen-device-id';
+      const CK_KEY = 'shiwenDeviceId';
+      const DAYS = 365 * 5;
+      let fromLS = '';
+      try { fromLS = (localStorage.getItem(LS_KEY) || '').trim(); } catch (e) { fromLS = ''; }
+      const fromCK = (this._getCookie(CK_KEY) || '').trim();
+      let id = '';
+      if (fromLS && fromCK && fromLS !== fromCK) {
+        // 两者不一致：取 LocalStorage 为主，同时把 Cookie 覆盖回写为 LS 的值
+        id = fromLS;
+      } else {
+        id = fromLS || fromCK;
+      }
+      if (!id) {
+        id = 'dev_' + Date.now().toString(36) + '_' + this._uuidShort();
+      }
+      try { localStorage.setItem(LS_KEY, id); } catch (e) {}
+      this._setCookie(CK_KEY, id, DAYS);
+      return id;
+    },
+    _getDeviceId() {
+      return this._ensureDeviceId();
+    },
+    // 上传使用 deviceId 作为文件名（不含时间戳），同设备重复上传直接覆盖上一份
+    _buildUploadFileName(kind) {
+      const did = this._getDeviceId();
+      const safe = did.replace(/[\\/:*?"<>|\s]/g, '_');
+      if (kind === 'result') return safe + '苏轼诗文TOP64.csv';
+      if (kind === 'elim') return safe + '淘汰表.csv';
+      return safe + '.csv';
+    },
     _csvEscape(s) {
       if (s === null || s === undefined) return '""';
       const x = String(s);
@@ -692,7 +761,7 @@ export default {
     _downloadCSV(csvStr, suffix) {
       const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
-      const name = this._getSafeFillerName() + '_苏轼N选64_' + suffix + '_' + this._formatDate() + '.csv';
+      const name = this._getDeviceId() + '_' + this._getSafeFillerName() + '_苏轼N选64_' + suffix + '_' + this._formatDate() + '.csv';
       link.href = URL.createObjectURL(blob);
       link.download = name;
       link.click();
@@ -888,7 +957,7 @@ export default {
         const dataUrl = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = dataUrl;
-        link.download = this._getSafeFillerName() + '_苏轼N选64_' + mode + '_' + this._formatDate() + '.png';
+        link.download = this._getDeviceId() + '_' + this._getSafeFillerName() + '_苏轼N选64_' + mode + '_' + this._formatDate() + '.png';
         document.body.appendChild(link);
         link.click();
         setTimeout(() => {
@@ -1025,7 +1094,7 @@ export default {
       try {
         const csv = this._buildResultCSV();
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const name = this._getSafeFillerName() + '_苏轼N选64_苏轼诗文TOP64_' + this._formatDate() + '.csv';
+        const name = this._buildUploadFileName('result');
         await this._uploadBlob(blob, name, 'shiwen-nxuan64');
         this.showMsg('上传成功', '上传成功，感谢您的投稿！');
       } catch (err) {
@@ -1052,7 +1121,7 @@ export default {
       try {
         const csv = this._buildElimCSV();
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const name = this._getSafeFillerName() + '_苏轼N选64_淘汰表_' + this._formatDate() + '.csv';
+        const name = this._buildUploadFileName('elim');
         await this._uploadBlob(blob, name, 'shiwen-eliminated');
         this.showMsg('上传成功', '上传成功，感谢您的投稿！');
       } catch (err) {

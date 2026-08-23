@@ -589,10 +589,10 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .export-only-head .export-sub-cell .sub-flex { gap: 6px; }
 }
 .result-cell {
-  padding: 1px 2px;
-  font-size: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
   vertical-align: middle;
-  height: 22px;
+  height: 44px;
 }
 .result-cell .poem-title,
 .result-cell .poem-content {
@@ -602,13 +602,12 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   max-width: 100%;
   display: block;
   margin: 0;
-  line-height: 1.05;
+  line-height: 1.35;
 }
-.result-cell .poem-title { font-size: 9px; margin-bottom: 0; }
-.result-cell .poem-content { font-size: 8px; color: #5c7a5c; }
+.result-cell .poem-content { color: #5c7a5c; }
 .result-idx {
   color: #b8cdb8;
-  font-size: 7px;
+  font-size: 10px;
   display: block;
   text-align: center;
 }
@@ -620,7 +619,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 .elim-multi .elim-table { min-width: 0; table-layout: fixed; }
 .elim-table th { background: #a3bca8; border-color: #8fae93; white-space: nowrap; }
 .elim-cell {
-  padding: 4px 6px;
+  padding: 4px 10px;
   background: #fcfdfb;
   font-size: 12px;
   vertical-align: top;
@@ -632,12 +631,11 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
-  line-height: 1.25;
+  line-height: 1.35;
 }
 .elim-cell:hover { background: #f5f8f4; border-color: #4a7a52; }
 .elim-cell.empty { background: #faf9f6; cursor: default; }
-.elim-cell .poem-title { font-size: 12px; }
-.elim-cell .poem-content { font-size: 11px; }
+.elim-cell .poem-content { color: #4e5b4e; }
 
 /* ==================== 断点 1: <900px（手机/窄屏）：单列，顺序：诗文库 → 64结果表 → 淘汰表 ==================== */
 @media (max-width: 899px) {
@@ -691,9 +689,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   }
   .result-table { min-width: 0; }
   .result-table colgroup col { min-width: 100%; }
-  .result-cell { height: 27px; padding: 1px 2px; vertical-align: middle; }
-  .result-cell .poem-title { font-size: 9px; line-height: 1.05; margin-bottom: 0; }
-  .result-cell .poem-content { font-size: 8px; line-height: 1.05; }
+  .result-cell { height: 40px; padding: 4px 6px; vertical-align: middle; }
 
   th { font-size: 11px; padding: 3px 4px; }
   td { font-size: 11px; padding: 3px 4px; }
@@ -743,9 +739,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .n64-col-main   { grid-column: 2; grid-row: 1; order: initial; }
   .n64-col-result { grid-column: 3; grid-row: 1; order: initial; }
 
-  .result-cell { height: 37px; padding: 1px 3px; vertical-align: middle; }
-  .result-cell .poem-title { font-size: 10px; line-height: 1.05; margin-bottom: 0; }
-  .result-cell .poem-content { font-size: 9px; line-height: 1.05; }
+  .result-cell { height: 44px; padding: 4px 8px; vertical-align: middle; }
 }
 
 /* ==================== 700px 小屏进一步压缩 ==================== */
@@ -792,9 +786,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 
   .result-table { min-width: 0; }
   .result-table colgroup col { min-width: 100%; }
-  .result-cell { height: 26px; padding: 1px 2px; vertical-align: middle; }
-  .result-cell .poem-title { font-size: 8px; line-height: 1.05; margin-bottom: 0; }
-  .result-cell .poem-content { font-size: 7px; line-height: 1.05; }
+  .result-cell { height: 36px; padding: 3px 5px; vertical-align: middle; }
 
   .result-wrapper,
   .elim-wrapper {
@@ -808,7 +800,6 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
     min-height: 432px; /* 原 360 × 6/5 */
   }
 
-  .elim-cell { padding: 2px 3px; font-size: 10px; }
-  .elim-cell .poem-title { font-size: 9px; }
-  .elim-cell .poem-content { font-size: 8px; }
+  .elim-cell { padding: 3px 5px; font-size: 10px; }
+  .elim-cell .poem-content { color: #4e5b4e; }
 }
