@@ -39,49 +39,12 @@
       </div>
 
       <div class="n64-layout">
-        <!-- 64结果表 4列 -->
-        <div class="n64-col n64-col-result">
-          <div class="table-title-row">
-            <div class="title-deco-bar"></div>
-            <h2 class="table-page-title">64结果表</h2>
-            <span class="n64-counter">{{ result64.length }} / 64</span>
-          </div>
-          <div class="table-wrapper result-wrapper">
-            <table class="result-table">
-              <colgroup>
-                <col v-for="n in 4" :key="'c'+n" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th v-for="n in 4" :key="'th'+n">结果{{ n }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="r in 16" :key="'r'+r">
-                  <td
-                    v-for="c in 4"
-                    :key="'td'+r+'-'+c"
-                    :class="['result-cell', { empty: !getResultCell(r, c) }]"
-                    @dblclick="removeFromResult(r, c)"
-                  >
-                    <template v-if="getResultCell(r, c)">
-                      <span class="poem-title">{{ getResultCell(r, c).title }}</span>
-                      <span class="poem-content">{{ getResultCell(r, c).content }}</span>
-                    </template>
-                    <span v-else class="result-idx">{{ (r - 1) * 4 + c }}</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- 诗文主表 单列 高1500px区域 -->
+        <!-- 诗文库主表 单列 高1500px区域 -->
         <div class="n64-col n64-col-main">
           <div class="table-title-row">
             <div class="title-deco-bar"></div>
             <h2 class="table-page-title">诗文库主表</h2>
-            <p class="hint">双击 → 选入64结果表 &nbsp;|&nbsp; 左滑 → 淘汰</p>
+            <p class="hint">单击 → 选入结果表 / 再次单击取消 &nbsp;|&nbsp; 左滑 → 淘汰</p>
           </div>
           <div class="table-wrapper poem-library-wrapper">
             <table class="poem-library-table">
@@ -98,7 +61,7 @@
                   v-for="p in visiblePoems"
                   :key="p.id"
                   :class="['poem-row', { selected: isSelected(p.id), 'swiping': p.swiping }]"
-                  @dblclick="selectToResult(p)"
+                  @click.stop="toggleSelect(p)"
                   @touchstart="onTouchStart(p, $event)"
                   @touchmove="onTouchMove(p, $event)"
                   @touchend="onTouchEnd(p, $event)"
@@ -112,6 +75,43 @@
                       </div>
                       <div class="swipe-action" @click.stop="eliminate(p)">淘汰</div>
                     </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 64结果表 4列（行数自适应，超64自动加行） -->
+        <div class="n64-col n64-col-result">
+          <div class="table-title-row">
+            <div class="title-deco-bar"></div>
+            <h2 class="table-page-title">64结果表</h2>
+            <span class="n64-counter">{{ result64.length }} 首</span>
+          </div>
+          <div class="table-wrapper result-wrapper">
+            <table class="result-table">
+              <colgroup>
+                <col v-for="n in 4" :key="'c'+n" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th v-for="n in 4" :key="'th'+n">结果{{ n }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="r in resultRows" :key="'r'+r">
+                  <td
+                    v-for="c in 4"
+                    :key="'td'+r+'-'+c"
+                    :class="['result-cell', { empty: !getResultCell(r, c) }]"
+                    @click="removeFromResult(r, c)"
+                  >
+                    <template v-if="getResultCell(r, c)">
+                      <span class="poem-title">{{ getResultCell(r, c).title }}</span>
+                      <span class="poem-content">{{ getResultCell(r, c).content }}</span>
+                    </template>
+                    <span v-else class="result-idx">{{ (r - 1) * 4 + c }}</span>
                   </td>
                 </tr>
               </tbody>
@@ -190,7 +190,6 @@ function parsePoemsFromTxt(text) {
 }
 
 function parseCSV(text) {
-  // 去掉 UTF-8 BOM
   let s = text || '';
   if (s.charCodeAt(0) === 0xFEFF) s = s.slice(1);
   const rows = [];
@@ -211,7 +210,6 @@ function parseCSV(text) {
       else if (ch === ',') { items.push(cur); cur = ''; }
       else if (ch === '\r' || ch === '\n') {
         items.push(cur); cur = '';
-        // 跳过 \r\n
         if (ch === '\r' && s[i + 1] === '\n') i++;
         rows.push(items.slice());
         items.length = 0;
@@ -230,7 +228,6 @@ function parseCSV(text) {
 function parsePoemsFromCSV(text) {
   const rows = parseCSV(text);
   if (rows.length === 0) return [];
-  // 跳过表头行
   const startIdx = (rows[0][0] || '').includes('诗文及内容') ? 1 : 0;
   const list = [];
   for (let i = startIdx; i < rows.length; i++) {
@@ -262,7 +259,6 @@ export default {
       allPoems: [],
       eliminatedIds: [],
       selectedIdsOrder: [],
-      // 触摸/鼠标滑动
       swipeStartX: {},
       swipeStartY: {},
       swipeActive: {},
@@ -270,7 +266,9 @@ export default {
       isMouseDown: false,
       mouseTarget: null,
       mouseStartX: 0,
-      mouseMoved: false
+      mouseMoved: false,
+      // 防止"滑动 + 点击"冲突：最近结束滑动的诗文 id 在短时间内忽略 click
+      ignoreNextClickId: null
     };
   },
   computed: {
@@ -284,15 +282,19 @@ export default {
     },
     result64() {
       return this.selectedIdsOrder
-        .slice(0, 64)
         .map(id => this.allPoems.find(p => p.id === id))
         .filter(Boolean);
     },
-    // 淘汰表多列判定：>=1200px 且 <1800px 时多列
+    resultRows() {
+      // 最少 16 行（64 格），超过后按 4 列自动加行
+      const needed = Math.ceil(Math.max(1, this.selectedIdsOrder.length) / 4);
+      return Math.max(16, needed);
+    },
     elimMultiCol() {
       if (typeof window === 'undefined') return false;
       const w = window.innerWidth;
-      return w >= 1200 && w < 1800;
+      // 新断点：>=900 且 <1400 时淘汰表在下方多列（两列模式）
+      return w >= 900 && w < 1400;
     },
     elimColCount() {
       return 4;
@@ -300,7 +302,8 @@ export default {
     elimGrid() {
       const cols = this.elimColCount;
       const list = this.eliminated;
-      const rows = Math.ceil(Math.max(1, list.length) / cols);
+      const len = Math.max(1, list.length);
+      const rows = Math.ceil(len / cols);
       const grid = [];
       for (let r = 0; r < rows; r++) {
         const row = [];
@@ -327,7 +330,6 @@ export default {
   },
   methods: {
     initPoems() {
-      // 优先 CSV（"诗文及内容"列），否则回退 TXT
       let list = parsePoemsFromCSV(csvSource);
       if (list.length === 0) list = parsePoemsFromTxt(poemSource);
       this.allPoems = list.map((p, i) => ({
@@ -338,7 +340,6 @@ export default {
       }));
     },
     forceRerender() {
-      // 触发 elimMultiCol 重算
       this.$forceUpdate();
     },
     hashToMode() {
@@ -359,17 +360,26 @@ export default {
       window.location.hash = m === '64' ? '/nxuan64' : '/';
     },
 
-    // 选中判定
     isSelected(id) {
       return this.selectedIdsOrder.indexOf(id) !== -1;
     },
 
-    // 诗文表双击：选入64结果表
-    selectToResult(p) {
+    // 单击诗文库：选中/取消
+    toggleSelect(p) {
       if (this.eliminatedIds.indexOf(p.id) !== -1) return;
-      if (this.isSelected(p.id)) return;
-      if (this.selectedIdsOrder.length >= 64) return;
-      this.$set(this.selectedIdsOrder, this.selectedIdsOrder.length, p.id);
+      // 滑动冲突过滤
+      if (this.ignoreNextClickId === p.id) {
+        this.ignoreNextClickId = null;
+        return;
+      }
+      if (this.isSelected(p.id)) {
+        // 取消选中，同时移出64结果表
+        const idx = this.selectedIdsOrder.indexOf(p.id);
+        if (idx !== -1) this.selectedIdsOrder.splice(idx, 1);
+      } else {
+        // 选中（无64上限）
+        this.$set(this.selectedIdsOrder, this.selectedIdsOrder.length, p.id);
+      }
     },
 
     // 64结果表：按行列取
@@ -377,20 +387,21 @@ export default {
       const idx = (r - 1) * 4 + (c - 1);
       return this.result64[idx] || null;
     },
-    // 双击64结果格：移除
+    // 单击64结果格：移除
     removeFromResult(r, c) {
       const idx = (r - 1) * 4 + (c - 1);
       if (idx >= this.selectedIdsOrder.length) return;
       this.selectedIdsOrder.splice(idx, 1);
     },
 
-    // 左滑：诗文表
+    // 左滑
     onTouchStart(p, e) {
       if (!e.touches || e.touches.length === 0) return;
       this.swipeStartX[p.id] = e.touches[0].clientX;
       this.swipeStartY[p.id] = e.touches[0].clientY;
       this.swipeDx[p.id] = 0;
       this.swipeActive[p.id] = true;
+      this.ignoreNextClickId = null;
     },
     onTouchMove(p, e) {
       if (!this.swipeActive[p.id]) return;
@@ -407,6 +418,7 @@ export default {
       if (dx < -60) {
         this.swipeDx[p.id] = -80;
         this.$set(p, 'swiping', true);
+        this.ignoreNextClickId = p.id;
       } else {
         this.swipeDx[p.id] = 0;
         this.$set(p, 'swiping', false);
@@ -414,7 +426,6 @@ export default {
       this.swipeActive[p.id] = false;
     },
     onMouseDown(p, e) {
-      // 仅在桌面端未触屏时生效；右键不处理
       if (e.button !== 0) return;
       this.isMouseDown = true;
       this.mouseTarget = p;
@@ -423,6 +434,7 @@ export default {
       this.swipeStartX[p.id] = e.clientX;
       this.swipeDx[p.id] = 0;
       this.swipeActive[p.id] = true;
+      this.ignoreNextClickId = null;
       window.addEventListener('mousemove', this.onMouseMove);
       window.addEventListener('mouseup', this.onMouseUp);
     },
@@ -445,6 +457,7 @@ export default {
       if (dx < -60) {
         this.swipeDx[p.id] = -80;
         this.$set(p, 'swiping', true);
+        this.ignoreNextClickId = p.id;
       } else {
         this.swipeDx[p.id] = 0;
         this.$set(p, 'swiping', false);
@@ -462,13 +475,11 @@ export default {
 
     // 淘汰
     eliminate(p) {
-      // 若已在64结果表，先移除
       const idx = this.selectedIdsOrder.indexOf(p.id);
       if (idx !== -1) this.selectedIdsOrder.splice(idx, 1);
       if (this.eliminatedIds.indexOf(p.id) === -1) {
         this.$set(this.eliminatedIds, this.eliminatedIds.length, p.id);
       }
-      // 重置滑动状态
       this.swipeDx[p.id] = 0;
       this.$set(p, 'swiping', false);
     },
