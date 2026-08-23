@@ -409,46 +409,60 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   box-sizing: border-box;
 }
 
-/* 全文按钮 & 展开行：按钮以绝对定位填满整格；宽=原文/收起的五分之四（约58px），与淘汰按钮宽度统一 */
-.expand-cell {
-  padding: 0 !important;
-  background: transparent !important;
-  cursor: default !important;
-  border: 1px solid #dde7dd;
-  vertical-align: top;
-  position: relative;
+/* 全文/淘汰按钮：不再分列，和诗文在同一行里左-中-右分布 */
+.inline-expand-btn,
+.inline-elim-btn {
+  flex: 0 0 58px;
   width: 58px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+}
+.inline-expand-btn {
+  background: #8a9a90;
+  color: #faf9f6;
+  transition: background 0.15s;
+  font-size: 12px;
+  line-height: 1.1;
+}
+.inline-expand-btn:hover { background: #7a8a80; color: #faf9f6; }
+.inline-elim-btn {
+  background: #c49492;
+  color: #faf9f6;
+  transition: background 0.15s;
+  font-size: 12px;
+}
+.inline-elim-btn:hover { background: #b38381; color: #faf9f6; }
+
+.poem-combo {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+.poem-combo .poem-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 10px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .expand-empty {
   padding: 0 !important;
   background: #faf9f6 !important;
   border-right: 1px solid #dde7dd;
   border-bottom: 1px solid #dde7dd;
-}
-.expand-btn {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  font-size: 12px;
-  line-height: 1.1;
-  color: #faf9f6;
-  background: #8a9a90;
-  border: none;
-  border-radius: 0;
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 600;
-  letter-spacing: 1px;
-  transition: background 0.15s;
-  user-select: none;
-  box-sizing: border-box;
-}
-.expand-btn:hover {
-  background: #7a8a80;
-  color: #faf9f6;
 }
 .expand-row td.expand-body {
   padding: 10px 14px;
@@ -499,33 +513,6 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 }
 .poem-library-table td { background: #fcfdfb; }
 .poem-library-table .poem-cell { padding: 0; overflow: hidden; }
-.poem-inner {
-  display: flex;
-  align-items: stretch;
-  min-height: 100%;
-  transition: transform 0.2s ease;
-  position: relative;
-}
-.poem-text {
-  flex: 1;
-  padding: 6px 10px;
-  background: transparent;
-}
-.swipe-action {
-  width: 58px;
-  background: #c49492;
-  color: #faf9f6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  cursor: pointer;
-  user-select: none;
-  flex-shrink: 0;
-}
-.swipe-action:hover { background: #b38381; color: #faf9f6; }
 .poem-cell.selected { background: #e3f1e5; }
 .poem-cell.selected:hover { background: #d4e9d7; }
 
@@ -697,9 +684,8 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .poem-content { font-size: 10px; }
   .table-page-title { font-size: 16px; letter-spacing: 1px; }
 
-  .expand-btn { font-size: 10px; letter-spacing: 0; }
-  .expand-cell { width: 42px; }
-  .swipe-action { width: 42px; font-size: 10px; letter-spacing: 0; }
+  .inline-expand-btn,
+  .inline-elim-btn { flex: 0 0 42px; width: 42px; font-size: 10px; letter-spacing: 0; }
   .expand-content { font-size: 10px; line-height: 1.7; }
 }
 

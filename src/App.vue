@@ -61,36 +61,29 @@
           <div class="table-wrapper poem-library-wrapper" id="mainLibraryWrapper">
             <table class="poem-library-table" id="mainLibraryTable">
               <colgroup>
-                <col style="width:58px" />
                 <col />
               </colgroup>
               <tbody>
                 <template v-for="p in visiblePoems" :key="'grp-'+p.id">
                   <tr
-                    :class="['poem-row', { selected: isSelected(p.id), 'swiping': p.swiping }]"
+                    :class="['poem-row', { selected: isSelected(p.id) }]"
                     @click.stop="toggleSelect(p)"
-                    @touchstart="onTouchStart(p, $event)"
-                    @touchmove="onTouchMove(p, $event)"
-                    @touchend="onTouchEnd(p, $event)"
-                    @mousedown="onMouseDown(p, $event)"
                   >
-                    <td class="expand-cell" @click.stop>
-                      <button class="expand-btn" @click.stop="toggleExpand(p)">
-                        {{ expandedId === p.id ? '收起' : '全文' }}
-                      </button>
-                    </td>
                     <td :class="['poem-cell', { selected: isSelected(p.id) }]">
-                      <div class="poem-inner" :style="getSwipeStyle(p)">
+                      <div class="poem-combo">
+                        <button class="expand-btn inline-expand-btn" @click.stop="toggleExpand(p)">
+                          {{ expandedId === p.id ? '收起' : '全文' }}
+                        </button>
                         <div class="poem-text">
                           <span class="poem-title">{{ p.title }}</span>
                           <span class="poem-content">{{ p.content }}</span>
                         </div>
-                        <div class="swipe-action" @click.stop="eliminate(p)">淘汰</div>
+                        <button class="swipe-action inline-elim-btn" @click.stop="eliminate(p)">淘汰</button>
                       </div>
                     </td>
                   </tr>
                   <tr v-if="expandedId === p.id" :key="'ex-'+p.id" class="expand-row">
-                    <td class="expand-body" colspan="2">
+                    <td class="expand-body">
                       <div class="expand-body-inner">
                         <strong class="expand-title">{{ p.title }}</strong>
                         <pre class="expand-content">{{ p.fullText || (p.title + '\n' + p.content) }}</pre>
@@ -346,15 +339,6 @@ export default {
       eliminatedIds: [],
       selectedIdsOrder: [],
       expandedId: null,
-      swipeStartX: {},
-      swipeStartY: {},
-      swipeActive: {},
-      swipeDx: {},
-      isMouseDown: false,
-      mouseTarget: null,
-      mouseStartX: 0,
-      mouseMoved: false,
-      ignoreNextClickId: null,
       fillerName: '',
       uploadingResult: false,
       uploadingElim: false,
@@ -454,7 +438,6 @@ export default {
         title: p.title,
         content: p.content,
         fullText: p.fullText,
-        swiping: false
       }));
     },
     forceRerender() { this.$forceUpdate(); },
@@ -481,10 +464,6 @@ export default {
 
     toggleSelect(p) {
       if (this.eliminatedIds.indexOf(p.id) !== -1) return;
-      if (this.ignoreNextClickId === p.id) {
-        this.ignoreNextClickId = null;
-        return;
-      }
       if (this.isSelected(p.id)) {
         const idx = this.selectedIdsOrder.indexOf(p.id);
         if (idx !== -1) this.selectedIdsOrder.splice(idx, 1);
@@ -503,84 +482,6 @@ export default {
       this.selectedIdsOrder.splice(idx, 1);
     },
 
-    onTouchStart(p, e) {
-      if (!e.touches || e.touches.length === 0) return;
-      this.swipeStartX[p.id] = e.touches[0].clientX;
-      this.swipeStartY[p.id] = e.touches[0].clientY;
-      this.swipeDx[p.id] = 0;
-      this.swipeActive[p.id] = true;
-      this.ignoreNextClickId = null;
-    },
-    onTouchMove(p, e) {
-      if (!this.swipeActive[p.id]) return;
-      if (!e.touches || e.touches.length === 0) return;
-      const dx = e.touches[0].clientX - this.swipeStartX[p.id];
-      const dy = e.touches[0].clientY - this.swipeStartY[p.id];
-      if (Math.abs(dx) < Math.abs(dy)) return;
-      this.swipeDx[p.id] = Math.min(0, Math.max(-100, dx));
-      e.preventDefault();
-    },
-    onTouchEnd(p) {
-      if (!this.swipeActive[p.id]) return;
-      const dx = this.swipeDx[p.id] || 0;
-      if (dx < -60) {
-        this.swipeDx[p.id] = -80;
-        this.$set(p, 'swiping', true);
-        this.ignoreNextClickId = p.id;
-      } else {
-        this.swipeDx[p.id] = 0;
-        this.$set(p, 'swiping', false);
-      }
-      this.swipeActive[p.id] = false;
-    },
-    onMouseDown(p, e) {
-      if (e.button !== 0) return;
-      this.isMouseDown = true;
-      this.mouseTarget = p;
-      this.mouseStartX = e.clientX;
-      this.mouseMoved = false;
-      this.swipeStartX[p.id] = e.clientX;
-      this.swipeDx[p.id] = 0;
-      this.swipeActive[p.id] = true;
-      this.ignoreNextClickId = null;
-      window.addEventListener('mousemove', this.onMouseMove);
-      window.addEventListener('mouseup', this.onMouseUp);
-    },
-    onMouseMove(e) {
-      const p = this.mouseTarget;
-      if (!this.isMouseDown || !p) return;
-      const dx = e.clientX - this.swipeStartX[p.id];
-      if (Math.abs(dx) > 5) this.mouseMoved = true;
-      this.swipeDx[p.id] = Math.min(0, Math.max(-100, dx));
-    },
-    onMouseUp() {
-      const p = this.mouseTarget;
-      if (!p) {
-        this.isMouseDown = false;
-        window.removeEventListener('mousemove', this.onMouseMove);
-        window.removeEventListener('mouseup', this.onMouseUp);
-        return;
-      }
-      const dx = this.swipeDx[p.id] || 0;
-      if (dx < -60) {
-        this.swipeDx[p.id] = -80;
-        this.$set(p, 'swiping', true);
-        this.ignoreNextClickId = p.id;
-      } else {
-        this.swipeDx[p.id] = 0;
-        this.$set(p, 'swiping', false);
-      }
-      this.swipeActive[p.id] = false;
-      this.isMouseDown = false;
-      this.mouseTarget = null;
-      window.removeEventListener('mousemove', this.onMouseMove);
-      window.removeEventListener('mouseup', this.onMouseUp);
-    },
-    getSwipeStyle(p) {
-      const dx = this.swipeDx[p.id] || 0;
-      return { transform: 'translateX(' + dx + 'px)' };
-    },
-
     eliminate(p) {
       const idx = this.selectedIdsOrder.indexOf(p.id);
       if (idx !== -1) this.selectedIdsOrder.splice(idx, 1);
@@ -588,15 +489,11 @@ export default {
         this.$set(this.eliminatedIds, this.eliminatedIds.length, p.id);
       }
       if (this.expandedId === p.id) this.expandedId = null;
-      this.swipeDx[p.id] = 0;
-      this.$set(p, 'swiping', false);
     },
 
     restore(p) {
       const i = this.eliminatedIds.indexOf(p.id);
       if (i !== -1) this.eliminatedIds.splice(i, 1);
-      this.swipeDx[p.id] = 0;
-      this.$set(p, 'swiping', false);
     },
 
     // ===================== 通用提示弹窗 =====================
@@ -678,13 +575,18 @@ export default {
     _getDeviceId() {
       return this._ensureDeviceId();
     },
-    // 上传使用 deviceId 作为文件名（不含时间戳），同设备重复上传直接覆盖上一份
+    // 上传使用 deviceId 作为 R2 folder 的子路径，同设备重复上传直接覆盖（PUT 同名 key = 覆盖）
+    // 文件名保持固定且简洁，不含动态随机串 / 日期，确保同一设备只保留一份
     _buildUploadFileName(kind) {
+      if (kind === 'result') return '苏轼诗文TOP64.csv';
+      if (kind === 'elim') return '淘汰表.csv';
+      return 'data.csv';
+    },
+    // 上传文件夹：在原 folder 下再追加 deviceId 子目录，同设备同表仅一份，新上传覆盖旧文件
+    _buildUploadFolder(kind, folder) {
       const did = this._getDeviceId();
       const safe = did.replace(/[\\/:*?"<>|\s]/g, '_');
-      if (kind === 'result') return safe + '苏轼诗文TOP64.csv';
-      if (kind === 'elim') return safe + '淘汰表.csv';
-      return safe + '.csv';
+      return (folder ? folder + '/' : '') + safe;
     },
     _csvEscape(s) {
       if (s === null || s === undefined) return '""';
@@ -1095,7 +997,8 @@ export default {
         const csv = this._buildResultCSV();
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const name = this._buildUploadFileName('result');
-        await this._uploadBlob(blob, name, 'shiwen-nxuan64');
+        const folder = this._buildUploadFolder('result', 'shiwen-nxuan64');
+        await this._uploadBlob(blob, name, folder);
         this.showMsg('上传成功', '上传成功，感谢您的投稿！');
       } catch (err) {
         console.error(err);
@@ -1122,7 +1025,8 @@ export default {
         const csv = this._buildElimCSV();
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const name = this._buildUploadFileName('elim');
-        await this._uploadBlob(blob, name, 'shiwen-eliminated');
+        const folder = this._buildUploadFolder('elim', 'shiwen-eliminated');
+        await this._uploadBlob(blob, name, folder);
         this.showMsg('上传成功', '上传成功，感谢您的投稿！');
       } catch (err) {
         console.error(err);
