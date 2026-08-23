@@ -39,12 +39,13 @@
       </div>
 
       <div class="n64-layout">
-        <!-- 诗文库主表 单列 高1500px区域 -->
+        <!-- 诗文库主表 -->
         <div class="n64-col n64-col-main">
           <div class="table-title-row">
             <div class="title-deco-bar"></div>
             <h2 class="table-page-title">诗文库主表</h2>
-            <p class="hint">单击 → 选入结果表 / 再次单击取消 &nbsp;|&nbsp; 左滑 → 淘汰</p>
+            <span class="table-hint">单击 → 选入结果表 / 再次单击取消 &nbsp;|&nbsp; 左滑 → 淘汰</span>
+            <span class="table-counter">{{ visiblePoems.length }} 首</span>
           </div>
           <div class="table-wrapper poem-library-wrapper">
             <table class="poem-library-table">
@@ -55,7 +56,7 @@
               <thead>
                 <tr>
                   <th>&nbsp;</th>
-                  <th>诗文及内容（共 {{ visiblePoems.length }} 首）</th>
+                  <th>诗文及内容</th>
                 </tr>
               </thead>
               <tbody>
@@ -98,12 +99,13 @@
           </div>
         </div>
 
-        <!-- 64结果表 4列（行数自适应，超64自动加行） -->
+        <!-- 64结果表 -->
         <div class="n64-col n64-col-result">
           <div class="table-title-row">
             <div class="title-deco-bar"></div>
             <h2 class="table-page-title">64结果表</h2>
-            <span class="n64-counter">{{ result64.length }} / 64</span>
+            <span class="table-hint">单击 → 移除该项</span>
+            <span class="table-counter">{{ result64.length }} / 64</span>
           </div>
           <div class="table-wrapper result-wrapper">
             <table class="result-table">
@@ -140,7 +142,8 @@
           <div class="table-title-row">
             <div class="title-deco-bar"></div>
             <h2 class="table-page-title">淘汰表</h2>
-            <span class="n64-counter">{{ eliminated.length }} 首</span>
+            <span class="table-hint">单击 → 回到诗文表</span>
+            <span class="table-counter">{{ eliminated.length }} 首</span>
           </div>
           <div class="table-wrapper elim-wrapper">
             <table class="elim-table" :class="{ 'elim-multi': elimMultiCol }">

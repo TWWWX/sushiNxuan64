@@ -141,13 +141,13 @@ body {
 }
 .back-link:hover { color: #2c3e2c; text-decoration: underline; }
 
-/* ==================== 标题行通用 ==================== */
+/* ==================== 标题行通用 —— 三表统一结构：[色条 标题] 注释(中间) 数量(最右) ==================== */
 .table-title-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 .title-deco-bar { width: 4px; height: 22px; background: #2c3e2c; flex-shrink: 0; }
 .table-page-title {
@@ -156,19 +156,24 @@ body {
   font-weight: 700;
   letter-spacing: 2px;
   white-space: nowrap;
+  flex-shrink: 0;
+  margin-right: 0;
 }
-.hint {
-  margin-left: auto;
+.table-hint {
   font-size: 12px;
   color: #6b866b;
   letter-spacing: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-.n64-counter {
+.table-counter {
   font-size: 13px;
   color: #4a7a52;
   font-weight: 600;
   margin-left: auto;
   letter-spacing: 1px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ==================== 通用表格容器 & th/td 基础 ==================== */
@@ -249,14 +254,17 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   align-self: start;
 }
 
-/* 全文按钮 & 展开行：按钮样式与「淘汰」按钮保持一致（纯色条块，无外框） */
+/* 全文按钮 & 展开行：按钮结构与「淘汰」按钮完全一致（纯色条块占满整格，无上下白线） */
 .expand-cell {
   padding: 0 !important;
   background: transparent !important;
   cursor: default !important;
   border-right: 1px solid #dde7dd;
   border-bottom: 1px solid #dde7dd;
-  vertical-align: middle;
+  border-top: 1px solid #dde7dd;
+  vertical-align: top;
+  position: relative;
+  width: 72px;
 }
 .expand-empty {
   padding: 0 !important;
@@ -268,14 +276,15 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-  min-height: 42px;
-  padding: 4px 0;
+  width: calc(100% + 2px);
+  min-height: calc(100% + 2px);
+  height: calc(100% + 2px);
+  margin: -1px 0 0 -1px;
+  padding: 8px 4px;
   font-size: 13px;
   line-height: 1.2;
-  color: #2c3e2c;
-  background: #c9d4cc;
+  color: #faf9f6;
+  background: #8a9a90;
   border: none;
   border-radius: 0;
   cursor: pointer;
@@ -287,8 +296,8 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   flex-shrink: 0;
 }
 .expand-btn:hover {
-  background: #b8c5bc;
-  color: #2c3e2c;
+  background: #7a8a80;
+  color: #faf9f6;
 }
 .expand-row td.expand-body {
   padding: 10px 14px;
@@ -325,8 +334,17 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   border: none;
 }
 
-/* 诗文库主表 */
-.poem-library-wrapper { height: 1500px; }
+/* 诗文库主表：高度随视窗动态计算（默认不超过屏幕可用高度） */
+.poem-library-wrapper {
+  max-height: calc(100vh - 280px);
+  min-height: 520px;
+}
+/* 64结果表 & 淘汰表：同样限制不超过视窗高度 */
+.result-wrapper,
+.elim-wrapper {
+  max-height: calc(100vh - 280px);
+  min-height: 520px;
+}
 .poem-library-table td { background: #fcfdfb; }
 .poem-library-table .poem-cell { padding: 0; overflow: hidden; }
 .poem-inner {
@@ -343,8 +361,8 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 }
 .swipe-action {
   width: 80px;
-  background: #e7c9c6;
-  color: #2c3e2c;
+  background: #c49492;
+  color: #faf9f6;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -355,7 +373,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   user-select: none;
   flex-shrink: 0;
 }
-.swipe-action:hover { background: #d9b5b1; color: #2c3e2c; }
+.swipe-action:hover { background: #b38381; color: #faf9f6; }
 .poem-cell.selected { background: #e3f1e5; }
 .poem-cell.selected:hover { background: #d4e9d7; }
 
@@ -407,7 +425,13 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .n64-col-elim   { order: 3; }
   .n64-col { width: 100%; }
 
-  .poem-library-wrapper { height: 1100px; }
+  .poem-library-wrapper,
+  .result-wrapper,
+  .elim-wrapper {
+    height: auto;
+    max-height: calc(100vh - 240px);
+    min-height: 420px;
+  }
   .result-cell { height: 88px; padding: 2px 3px; }
   .result-cell .poem-title { font-size: 10px; }
   .result-cell .poem-content { font-size: 9px; }
@@ -479,8 +503,10 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .card-subtitle { font-size: 12px; }
 
   .table-page-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .table-title-row { flex-wrap: wrap; }
-  .hint { margin-left: 0; width: 100%; font-size: 10px; }
+  .table-title-row { flex-wrap: wrap; gap: 8px; }
+  .table-hint,
+  .table-counter { margin-left: 0; width: auto; font-size: 10px; flex: 1 1 auto; }
+  .table-counter { text-align: right; flex: 0 0 auto; margin-left: auto; }
   .table-page-title { font-size: 14px; letter-spacing: 1px; }
 
   th, td { font-size: 10px; padding: 2px 3px; line-height: 1.2; }
@@ -491,7 +517,13 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .result-cell .poem-title { font-size: 9px; }
   .result-cell .poem-content { font-size: 8px; }
 
-  .poem-library-wrapper { height: 900px; }
+  .poem-library-wrapper,
+  .result-wrapper,
+  .elim-wrapper {
+    height: auto;
+    max-height: calc(100vh - 220px);
+    min-height: 340px;
+  }
 
   .elim-cell { padding: 2px 3px; font-size: 10px; }
   .elim-cell .poem-title { font-size: 9px; }
