@@ -17,12 +17,12 @@ body {
 .homepage { animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-.home-header { text-align: center; margin-bottom: 44px; }
+.home-header { text-align: center; margin-bottom: 40px; }
 .home-title-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 20px;
 }
 .title-line {
   height: 1px;
@@ -30,7 +30,7 @@ body {
   flex: 0 1 100px;
 }
 .home-title {
-  font-size: 31px;
+  font-size: 28px;
   color: #2c3e2c;
   letter-spacing: 8px;
   font-weight: 700;
@@ -39,15 +39,15 @@ body {
 .home-subtitle {
   text-align: center;
   color: #6b866b;
-  font-size: 17px;
+  font-size: 14px;
   letter-spacing: 4px;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 .author-note-wrapper {
   display: flex;
-  max-width: 680px;
-  margin: 0 auto 44px;
+  max-width: 640px;
+  margin: 0 auto 40px;
 }
 .author-note-bar { width: 4px; background: #2c3e2c; flex-shrink: 0; }
 .author-note-box {
@@ -55,13 +55,13 @@ body {
   background: #faf9f6;
   border: 1px dashed #b8cdb8;
   border-left: none;
-  min-height: 180px;
-  padding: 28px 24px;
+  min-height: 160px;
+  padding: 24px 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #2c3e2c;
-  font-size: 18px;
+  font-size: 15px;
   line-height: 2;
   letter-spacing: 1px;
   white-space: pre-wrap;
@@ -71,13 +71,13 @@ body {
 .entry-cards {
   display: flex;
   justify-content: center;
-  gap: 28px;
+  gap: 24px;
   flex-wrap: wrap;
-  margin-bottom: 48px;
+  margin-bottom: 44px;
 }
 .entry-card {
-  width: 220px;
-  height: 82px;
+  width: 200px;
+  height: 76px;
   background: #fff;
   border: 1px solid #b8cdb8;
   cursor: pointer;
@@ -86,17 +86,17 @@ body {
   transition: all 0.25s ease;
 }
 .card-deco-bar { height: 4px; background: #2c3e2c; }
-.card-body { padding: 10px 14px; }
+.card-body { padding: 8px 12px; }
 .card-title {
-  font-size: 18px;
+  font-size: 15px;
   color: #2c3e2c;
   font-weight: 600;
   letter-spacing: 2px;
 }
 .card-subtitle {
-  font-size: 16px;
+  font-size: 13px;
   color: #6b866b;
-  margin-top: 5px;
+  margin-top: 4px;
   letter-spacing: 1px;
 }
 .entry-card:hover {
@@ -110,14 +110,14 @@ body {
   text-align: center;
   color: #6b866b;
   opacity: 0.7;
-  font-size: 15px;
+  font-size: 12px;
   letter-spacing: 1px;
-  margin: 48px 0 24px;
+  margin: 44px 0 20px;
   line-height: 1.8;
 }
 .random-poem-title {
-  font-size: 14px;
-  margin-top: 5px;
+  font-size: 11px;
+  margin-top: 4px;
   opacity: 0.8;
 }
 
@@ -127,14 +127,14 @@ body {
 .table-page-header {
   display: flex;
   align-items: center;
-  gap: 24px;
-  margin-bottom: 20px;
+  gap: 20px;
+  margin-bottom: 18px;
   flex-wrap: wrap;
 }
 .back-link {
   color: #4a7a52;
   cursor: pointer;
-  font-size: 17px;
+  font-size: 14px;
   text-decoration: none;
   white-space: nowrap;
   letter-spacing: 1px;
@@ -145,13 +145,13 @@ body {
 .table-title-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
 }
-.title-deco-bar { width: 4px; height: 24px; background: #2c3e2c; flex-shrink: 0; }
+.title-deco-bar { width: 4px; height: 22px; background: #2c3e2c; flex-shrink: 0; }
 .table-page-title {
-  font-size: 21px;
+  font-size: 18px;
   color: #2c3e2c;
   font-weight: 700;
   letter-spacing: 2px;
@@ -159,12 +159,12 @@ body {
 }
 .hint {
   margin-left: auto;
-  font-size: 15px;
+  font-size: 12px;
   color: #6b866b;
   letter-spacing: 0;
 }
 .n64-counter {
-  font-size: 16px;
+  font-size: 13px;
   color: #4a7a52;
   font-weight: 600;
   margin-left: auto;
@@ -189,10 +189,10 @@ table {
 th {
   background: #8fae93;
   color: #faf9f6;
-  padding: 6px 10px;
+  padding: 5px 8px;
   text-align: center;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 13px;
   border: 1px solid #7a9a7e;
   position: sticky;
   top: 0;
@@ -203,11 +203,11 @@ th {
 }
 td {
   border: 1px solid #dde7dd;
-  padding: 6px 10px;
+  padding: 5px 8px;
   text-align: left;
   vertical-align: middle;
-  font-size: 16px;
-  line-height: 1.4;
+  font-size: 13px;
+  line-height: 1.35;
   background: #fff;
   transition: background 0.2s;
   cursor: pointer;
@@ -220,16 +220,18 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 .poem-title {
   font-weight: 600;
   color: #2c3e2c;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   display: block;
-  font-size: 17px;
-  line-height: 1.4;
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
 }
 .poem-content {
   color: #4e5b4e;
-  font-size: 15px;
-  line-height: 1.4;
+  font-size: 12px;
+  line-height: 1.35;
   display: block;
+  text-align: center;
 }
 
 /* ==================== N选64 布局 ==================== */
@@ -240,11 +242,85 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 .n64-layout {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 28px;
+  gap: 26px;
   padding: 0;
+  align-items: start;
+}
+.n64-col {
+  width: 100%;
+  align-self: start;
 }
 
-/* 诗文库主表 wrapper：高度 1500px 滚动区域，单列 */
+/* 全文按钮 & 展开行 */
+.expand-cell {
+  padding: 3px 4px !important;
+  text-align: center !important;
+  background: #faf9f6 !important;
+  cursor: default !important;
+  border-right: 1px solid #dde7dd;
+  border-bottom: 1px solid #dde7dd;
+}
+.expand-empty {
+  padding: 0 !important;
+  background: #faf9f6 !important;
+  border-right: 1px solid #dde7dd;
+  border-bottom: 1px solid #dde7dd;
+}
+.expand-btn {
+  display: inline-block;
+  min-width: 46px;
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #2c3e2c;
+  background: #f5f8f4;
+  border: 1px solid #b8cdb8;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 1px;
+  transition: all 0.15s;
+}
+.expand-btn:hover {
+  background: #dde7dd;
+  border-color: #4a7a52;
+  color: #2c3e2c;
+}
+.expand-row td.expand-body {
+  padding: 10px 14px;
+  background: #fcfdfb;
+  border: 1px solid #dde7dd;
+  cursor: default;
+}
+.expand-row td.expand-body:hover {
+  background: #fcfdfb;
+  border-color: #dde7dd;
+}
+.expand-body-inner {
+  text-align: left;
+}
+.expand-title {
+  display: block;
+  font-size: 13px;
+  color: #2c3e2c;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+  text-align: left;
+}
+.expand-content {
+  margin: 0;
+  font-family: inherit;
+  font-size: 11px;
+  color: #4e5b4e;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+
+/* 诗文库主表 */
 .poem-library-wrapper { height: 1500px; }
 .poem-library-table td { background: #fcfdfb; }
 .poem-library-table .poem-cell { padding: 0; overflow: hidden; }
@@ -257,17 +333,17 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 }
 .poem-text {
   flex: 1;
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: transparent;
 }
 .swipe-action {
-  width: 92px;
+  width: 80px;
   background: #c94a3e;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 2px;
   cursor: pointer;
@@ -278,20 +354,20 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 .poem-cell.selected { background: #e3f1e5; }
 .poem-cell.selected:hover { background: #d4e9d7; }
 
-/* 64结果表：4列 固定 */
+/* 64结果表：4列 */
 .result-wrapper { }
-.result-table th { font-size: 15px; padding: 6px 4px; }
+.result-table th { font-size: 12px; padding: 5px 4px; }
 .result-cell {
-  padding: 5px 6px;
-  font-size: 14px;
+  padding: 4px 5px;
+  font-size: 12px;
   vertical-align: top;
-  height: 116px;
+  height: 100px;
 }
-.result-cell .poem-title { font-size: 14px; }
-.result-cell .poem-content { font-size: 13px; }
+.result-cell .poem-title { font-size: 11px; }
+.result-cell .poem-content { font-size: 10px; }
 .result-idx {
   color: #b8cdb8;
-  font-size: 13px;
+  font-size: 10px;
   display: block;
   text-align: center;
 }
@@ -301,24 +377,23 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 .elim-wrapper { }
 .elim-table th { background: #a3bca8; border-color: #8fae93; }
 .elim-cell {
-  padding: 5px 8px;
+  padding: 4px 6px;
   background: #fcfdfb;
-  font-size: 15px;
+  font-size: 12px;
   vertical-align: top;
   transition: all 0.15s;
 }
 .elim-cell:hover { background: #f5f8f4; border-color: #4a7a52; }
 .elim-cell.empty { background: #faf9f6; cursor: default; }
-.elim-cell .poem-title { font-size: 15px; }
-.elim-cell .poem-content { font-size: 14px; }
+.elim-cell .poem-title { font-size: 12px; }
+.elim-cell .poem-content { font-size: 11px; }
 
 /* ==================== 断点 1: <900px（手机/窄屏）：单列，顺序：诗文库 → 64结果表 → 淘汰表 ==================== */
 @media (max-width: 899px) {
-  #app-root { max-width: 100%; padding: 24px 20px; margin: 0; }
+  #app-root { max-width: 100%; padding: 20px 14px; margin: 0; }
 
   .n64-layout {
     grid-template-columns: 1fr;
-    /* DOM 顺序：main=1 / result=2 / elim=3  →  CSS order 也对应 1,2,3 与DOM一致 */
     max-width: 100%;
     margin: 0 auto;
   }
@@ -328,84 +403,91 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .n64-col { width: 100%; }
 
   .poem-library-wrapper { height: 1100px; }
-  .result-cell { height: 104px; padding: 3px 4px; }
-  .result-cell .poem-title { font-size: 13px; }
-  .result-cell .poem-content { font-size: 12px; }
+  .result-cell { height: 88px; padding: 2px 3px; }
+  .result-cell .poem-title { font-size: 10px; }
+  .result-cell .poem-content { font-size: 9px; }
 
-  th { font-size: 14px; padding: 4px 6px; }
-  td { font-size: 14px; padding: 4px 6px; }
-  .poem-title { font-size: 15px; }
-  .poem-content { font-size: 13px; }
-  .table-page-title { font-size: 18px; letter-spacing: 1px; }
+  th { font-size: 11px; padding: 3px 4px; }
+  td { font-size: 11px; padding: 3px 4px; }
+  .poem-title { font-size: 12px; }
+  .poem-content { font-size: 10px; }
+  .table-page-title { font-size: 16px; letter-spacing: 1px; }
+
+  .expand-btn { min-width: 40px; font-size: 10px; padding: 1px 4px; }
+  .expand-cell { width: 52px; }
+  .expand-content { font-size: 10px; line-height: 1.7; }
 }
 
-/* ==================== 断点 2: 900px ~ 1399px（两列）：左诗文库 / 右64结果表；淘汰表 4列居中下方（宽度 = 两栏+间距） ==================== */
+/* ==================== 断点 2: 900px ~ 1399px（两列）：左诗文库 / 右64结果表；淘汰表 4列居中下方 ==================== */
 @media (min-width: 900px) and (max-width: 1399px) {
-  #app-root { max-width: 100%; padding: 36px 40px; margin: 0; }
+  #app-root { max-width: 100%; padding: 40px 80px; margin: 0; }
 
   .n64-layout {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 0.76fr);
     grid-template-rows: auto auto;
-    gap: 28px;
+    gap: 30px;
     align-items: start;
+    justify-content: center;
+    max-width: 1280px;
+    margin: 0 auto;
   }
-  /* 诗文库左 / 64结果表右 */
   .n64-col-main   { grid-column: 1; grid-row: 1; }
   .n64-col-result { grid-column: 2; grid-row: 1; }
-  .n64-col-elim   { grid-column: 1 / span 2; grid-row: 2; width: 100%; justify-self: center; }
+  .n64-col-elim   { grid-column: 1 / span 2; grid-row: 2; width: 100%; justify-self: center; max-width: 1280px; }
 
   .elim-table { width: 100%; }
 }
 
-/* ==================== 断点 3: >=1400px（三列）：左淘汰表 | 中诗文库 | 右64结果表 ==================== */
+/* ==================== 断点 3: >=1400px（三列）：左淘汰表（窄） | 中诗文库 | 右64结果表 ==================== */
 @media (min-width: 1400px) {
-  /* #app-root 已 max-width:1800px 居中 */
-  #app-root { padding: 44px 56px; }
+  #app-root { padding: 44px 110px; }
 
   .n64-layout {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
-    gap: 32px;
+    grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.25fr) minmax(0, 0.95fr);
+    gap: 36px;
     align-items: start;
+    max-width: 1560px;
+    margin: 0 auto;
   }
   .n64-col-elim   { grid-column: 1; }
   .n64-col-main   { grid-column: 2; }
   .n64-col-result { grid-column: 3; }
 
-  .result-cell { height: 132px; padding: 6px 8px; }
-  .result-cell .poem-title { font-size: 15px; }
-  .result-cell .poem-content { font-size: 14px; }
+  .result-cell { height: 112px; padding: 5px 6px; }
+  .result-cell .poem-title { font-size: 12px; }
+  .result-cell .poem-content { font-size: 11px; }
 }
 
 /* ==================== 700px 小屏进一步压缩 ==================== */
 @media (max-width: 700px) {
-  #app-root { padding: 20px 14px; max-width: 100%; }
+  #app-root { padding: 16px 10px; max-width: 100%; }
   .home-title-row { gap: 8px; }
   .title-line { display: none; }
-  .home-title { font-size: 21px; letter-spacing: 4px; }
-  .home-subtitle { font-size: 14px; letter-spacing: 2px; }
-  .author-note-wrapper { max-width: 100%; margin-left: 12px; margin-right: 12px; }
-  .author-note-box { min-height: 140px; font-size: 15px; padding: 22px 18px; line-height: 2; }
-  .entry-cards { gap: 14px; }
-  .entry-card { width: 170px; height: 82px; }
-  .card-title { font-size: 16px; }
-  .card-subtitle { font-size: 14px; }
+  .home-title { font-size: 18px; letter-spacing: 4px; }
+  .home-subtitle { font-size: 11px; letter-spacing: 2px; }
+  .author-note-wrapper { max-width: 100%; margin-left: 10px; margin-right: 10px; }
+  .author-note-box { min-height: 120px; font-size: 12px; padding: 20px 16px; line-height: 2; }
+  .entry-cards { gap: 12px; }
+  .entry-card { width: 150px; height: 70px; }
+  .card-title { font-size: 13px; }
+  .card-subtitle { font-size: 12px; }
 
-  .table-page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .table-page-header { flex-direction: column; align-items: flex-start; gap: 8px; }
   .table-title-row { flex-wrap: wrap; }
-  .hint { margin-left: 0; width: 100%; font-size: 13px; }
-  .table-page-title { font-size: 16px; letter-spacing: 1px; }
+  .hint { margin-left: 0; width: 100%; font-size: 10px; }
+  .table-page-title { font-size: 14px; letter-spacing: 1px; }
 
-  th, td { font-size: 13px; padding: 3px 4px; line-height: 1.3; }
-  .poem-title { font-size: 13px; margin-bottom: 1px; }
-  .poem-content { font-size: 12px; }
+  th, td { font-size: 10px; padding: 2px 3px; line-height: 1.2; }
+  .poem-title { font-size: 10px; margin-bottom: 0; }
+  .poem-content { font-size: 9px; }
 
-  .result-cell { height: 96px; padding: 2px 3px; }
-  .result-cell .poem-title { font-size: 12px; }
-  .result-cell .poem-content { font-size: 11px; }
+  .result-cell { height: 78px; padding: 1px 2px; }
+  .result-cell .poem-title { font-size: 9px; }
+  .result-cell .poem-content { font-size: 8px; }
 
   .poem-library-wrapper { height: 900px; }
 
-  .elim-cell { padding: 3px 4px; font-size: 13px; }
-  .elim-cell .poem-title { font-size: 12px; }
-  .elim-cell .poem-content { font-size: 11px; }
+  .elim-cell { padding: 2px 3px; font-size: 10px; }
+  .elim-cell .poem-title { font-size: 9px; }
+  .elim-cell .poem-content { font-size: 8px; }
 }

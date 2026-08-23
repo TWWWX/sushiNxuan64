@@ -49,34 +49,50 @@
           <div class="table-wrapper poem-library-wrapper">
             <table class="poem-library-table">
               <colgroup>
+                <col style="width:64px" />
                 <col />
               </colgroup>
               <thead>
                 <tr>
+                  <th>&nbsp;</th>
                   <th>诗文及内容（共 {{ visiblePoems.length }} 首）</th>
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="p in visiblePoems"
-                  :key="p.id"
-                  :class="['poem-row', { selected: isSelected(p.id), 'swiping': p.swiping }]"
-                  @click.stop="toggleSelect(p)"
-                  @touchstart="onTouchStart(p, $event)"
-                  @touchmove="onTouchMove(p, $event)"
-                  @touchend="onTouchEnd(p, $event)"
-                  @mousedown="onMouseDown(p, $event)"
-                >
-                  <td :class="['poem-cell', { selected: isSelected(p.id) }]">
-                    <div class="poem-inner" :style="getSwipeStyle(p)">
-                      <div class="poem-text">
-                        <span class="poem-title">{{ p.title }}</span>
-                        <span class="poem-content">{{ p.content }}</span>
+                <template v-for="p in visiblePoems" :key="'grp-'+p.id">
+                  <tr
+                    :class="['poem-row', { selected: isSelected(p.id), 'swiping': p.swiping }]"
+                    @click.stop="toggleSelect(p)"
+                    @touchstart="onTouchStart(p, $event)"
+                    @touchmove="onTouchMove(p, $event)"
+                    @touchend="onTouchEnd(p, $event)"
+                    @mousedown="onMouseDown(p, $event)"
+                  >
+                    <td class="expand-cell" @click.stop>
+                      <button class="expand-btn" @click.stop="toggleExpand(p)">
+                        {{ expandedId === p.id ? '收起' : '全文' }}
+                      </button>
+                    </td>
+                    <td :class="['poem-cell', { selected: isSelected(p.id) }]">
+                      <div class="poem-inner" :style="getSwipeStyle(p)">
+                        <div class="poem-text">
+                          <span class="poem-title">{{ p.title }}</span>
+                          <span class="poem-content">{{ p.content }}</span>
+                        </div>
+                        <div class="swipe-action" @click.stop="eliminate(p)">淘汰</div>
                       </div>
-                      <div class="swipe-action" @click.stop="eliminate(p)">淘汰</div>
-                    </div>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                  <tr v-if="expandedId === p.id" :key="'ex-'+p.id" class="expand-row">
+                    <td class="expand-empty"></td>
+                    <td class="expand-body">
+                      <div class="expand-body-inner">
+                        <strong class="expand-title">{{ p.title }}</strong>
+                        <pre class="expand-content">{{ p.fullText || (p.title + '\n' + p.content) }}</pre>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
@@ -87,7 +103,7 @@
           <div class="table-title-row">
             <div class="title-deco-bar"></div>
             <h2 class="table-page-title">64结果表</h2>
-            <span class="n64-counter">{{ result64.length }} 首</span>
+            <span class="n64-counter">{{ result64.length }} / 64</span>
           </div>
           <div class="table-wrapper result-wrapper">
             <table class="result-table">
@@ -231,18 +247,20 @@ function parsePoemsFromCSV(text) {
   const startIdx = (rows[0][0] || '').includes('诗文及内容') ? 1 : 0;
   const list = [];
   for (let i = startIdx; i < rows.length; i++) {
-    const cell = rows[i][0] || '';
-    if (!cell.trim()) continue;
-    const nl = cell.indexOf('\n');
+    const cell0 = rows[i][0] || '';
+    const cell1 = rows[i][1] || '';
+    if (!cell0.trim() && !cell1.trim()) continue;
+    const nl = cell0.indexOf('\n');
     let title, content;
     if (nl >= 0) {
-      title = cell.slice(0, nl).trim();
-      content = cell.slice(nl + 1).trim();
+      title = cell0.slice(0, nl).trim();
+      content = cell0.slice(nl + 1).trim();
     } else {
-      title = cell.trim();
+      title = cell0.trim();
       content = '';
     }
-    list.push({ title, content });
+    const fullText = cell1.trim() ? cell1.trim() : (title + '\n' + content).trim();
+    list.push({ title, content, fullText });
   }
   return list;
 }
@@ -259,6 +277,7 @@ export default {
       allPoems: [],
       eliminatedIds: [],
       selectedIdsOrder: [],
+      expandedId: null,
       swipeStartX: {},
       swipeStartY: {},
       swipeActive: {},
@@ -267,7 +286,6 @@ export default {
       mouseTarget: null,
       mouseStartX: 0,
       mouseMoved: false,
-      // 防止"滑动 + 点击"冲突：最近结束滑动的诗文 id 在短时间内忽略 click
       ignoreNextClickId: null
     };
   },
@@ -286,14 +304,12 @@ export default {
         .filter(Boolean);
     },
     resultRows() {
-      // 最少 16 行（64 格），超过后按 4 列自动加行
       const needed = Math.ceil(Math.max(1, this.selectedIdsOrder.length) / 4);
       return Math.max(16, needed);
     },
     elimMultiCol() {
       if (typeof window === 'undefined') return false;
       const w = window.innerWidth;
-      // 新断点：>=900 且 <1400 时淘汰表在下方多列（两列模式）
       return w >= 900 && w < 1400;
     },
     elimColCount() {
@@ -336,18 +352,13 @@ export default {
         id: 'p' + i,
         title: p.title,
         content: p.content,
+        fullText: p.fullText,
         swiping: false
       }));
     },
-    forceRerender() {
-      this.$forceUpdate();
-    },
-    hashToMode() {
-      return HASH_TO_MODE[window.location.hash] || null;
-    },
-    handleHashChange() {
-      this.mode = this.hashToMode();
-    },
+    forceRerender() { this.$forceUpdate(); },
+    hashToMode() { return HASH_TO_MODE[window.location.hash] || null; },
+    handleHashChange() { this.mode = this.hashToMode(); },
     refreshRandomPoem() {
       const poems = parsePoemsFromTxt(poemSource);
       if (poems.length > 0) {
@@ -360,41 +371,37 @@ export default {
       window.location.hash = m === '64' ? '/nxuan64' : '/';
     },
 
-    isSelected(id) {
-      return this.selectedIdsOrder.indexOf(id) !== -1;
+    isSelected(id) { return this.selectedIdsOrder.indexOf(id) !== -1; },
+
+    toggleExpand(p) {
+      if (this.expandedId === p.id) this.expandedId = null;
+      else this.expandedId = p.id;
     },
 
-    // 单击诗文库：选中/取消
     toggleSelect(p) {
       if (this.eliminatedIds.indexOf(p.id) !== -1) return;
-      // 滑动冲突过滤
       if (this.ignoreNextClickId === p.id) {
         this.ignoreNextClickId = null;
         return;
       }
       if (this.isSelected(p.id)) {
-        // 取消选中，同时移出64结果表
         const idx = this.selectedIdsOrder.indexOf(p.id);
         if (idx !== -1) this.selectedIdsOrder.splice(idx, 1);
       } else {
-        // 选中（无64上限）
         this.$set(this.selectedIdsOrder, this.selectedIdsOrder.length, p.id);
       }
     },
 
-    // 64结果表：按行列取
     getResultCell(r, c) {
       const idx = (r - 1) * 4 + (c - 1);
       return this.result64[idx] || null;
     },
-    // 单击64结果格：移除
     removeFromResult(r, c) {
       const idx = (r - 1) * 4 + (c - 1);
       if (idx >= this.selectedIdsOrder.length) return;
       this.selectedIdsOrder.splice(idx, 1);
     },
 
-    // 左滑
     onTouchStart(p, e) {
       if (!e.touches || e.touches.length === 0) return;
       this.swipeStartX[p.id] = e.touches[0].clientX;
@@ -473,18 +480,17 @@ export default {
       return { transform: 'translateX(' + dx + 'px)' };
     },
 
-    // 淘汰
     eliminate(p) {
       const idx = this.selectedIdsOrder.indexOf(p.id);
       if (idx !== -1) this.selectedIdsOrder.splice(idx, 1);
       if (this.eliminatedIds.indexOf(p.id) === -1) {
         this.$set(this.eliminatedIds, this.eliminatedIds.length, p.id);
       }
+      if (this.expandedId === p.id) this.expandedId = null;
       this.swipeDx[p.id] = 0;
       this.$set(p, 'swiping', false);
     },
 
-    // 复位
     restore(p) {
       const i = this.eliminatedIds.indexOf(p.id);
       if (i !== -1) this.eliminatedIds.splice(i, 1);
