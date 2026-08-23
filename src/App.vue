@@ -127,9 +127,7 @@
                 <tr class="export-row export-row-sub">
                   <th :colspan="displayCols" class="export-sub-cell">
                     <div class="sub-flex">
-                      <span class="es-left">网站制作：蟋蟀 诗文筛汇：嫻菜无敌 蟋蟀</span>
-                      <span class="es-mid">欢迎关注公众号「东坡墙」QQ「3301590656」</span>
-                      <span class="es-right">填表人：{{ _getSafeFillerName() }}</span>
+                      <span class="es-mid">填表人：{{ _getSafeFillerName() }}</span>
                     </div>
                   </th>
                 </tr>
@@ -216,7 +214,7 @@
           为了防止人机刷票，请写一段关于「自己与苏轼」的话以证明您是真实的人类，我们将根据您的自证决定是否采纳您提交的数据上榜。
           <br>
           <br>
-          <strong>注意：</strong>注意：若使用AI生成，一律不予采纳。
+          <strong>注意：</strong>若使用AI生成，一律不予采纳。
         </p>
         <textarea
           v-model="authText"
@@ -725,31 +723,40 @@ export default {
       cloneWrap.style.background = '#ffffff';
       cloneWrap.style.zIndex = '1';
       const tableClone = table.cloneNode(true);
-      // -------- 【重点】如果是 TOP64 结果表：把克隆体 2 列 → 强制重建为 4 列 --------
+      // -------- 【重点】TOP64 结果表：两列布局；每行合并宽度 = 原 4 列 / 2 * 2 + 10（每格比原两格合并宽+10） ----
       const isResult = (tableId === 'resultTable');
       if (isResult) {
-        const resultCols = 4;
+        const resultCols = 2; // 改为两列
         const data = this.result64.slice();
-        // 精确行数：实际需要多少画多少，不再强制 16 行，空行就不会出现 -> 消灭底部大段空白
+        // 64 首两列共 32 行；不足时补到整行
         const numRows = Math.max(1, Math.ceil(data.length / resultCols));
 
-        // 2a. colgroup = 4 列
-        const cg = tableClone.querySelector('colgroup');
-        if (cg) cg.innerHTML = '<col><col><col><col>';
+        // 字号 / 尺寸参数：基于原 4 列值分别调整
+        const cellH = 20 + 4;              // 行高 +4：原 20px → 24px
+        const titleFS = 10 + 1;            // 标题 +1 → 11px
+        const contentFS = 9 + 1;           // 内容 +1 → 10px
+        const idxFS = 7 + 1;               // 序号 +1 → 8px
+        // 总宽：原 4 列 880px；改两列后每列=440px。每行再整体宽 +10px → 890px
+        const totalW = 880 + 10;
 
-        // 2b. export-only-head colspan 改成 4，按 CSS 原值恢复 padding/字号（不做压缩）
+        // 2a. colgroup = 2 列
+        const cg = tableClone.querySelector('colgroup');
+        if (cg) cg.innerHTML = '<col><col>';
+
         const FF = '"Noto Serif SC","Songti SC","SimSun","STSong",serif';
+        // 2b. export-only-head：colspan = 2（两列）；标题行样式；第二行「填表人」居中
         const eHead = tableClone.querySelector('thead.export-only-head');
         if (eHead) {
-          eHead.querySelectorAll('th').forEach(th => { th.setAttribute('colspan', '4'); th.style.fontFamily = FF; });
+          eHead.querySelectorAll('th').forEach(th => { th.setAttribute('colspan', '2'); th.style.fontFamily = FF; });
           const titleTh = eHead.querySelector('.export-title-cell');
           if (titleTh) {
-            titleTh.style.padding = '16px 10px 8px';
+            titleTh.style.padding = '18px 12px 8px';
             titleTh.style.fontSize = '26px';
             titleTh.style.letterSpacing = '4px';
             titleTh.style.fontFamily = FF;
             titleTh.style.background = '#faf9f6';
             titleTh.style.borderBottom = '1px solid #b8cdb8';
+            titleTh.style.textAlign = 'center';
           }
           const subTh = eHead.querySelector('.export-sub-cell');
           if (subTh) {
@@ -757,31 +764,34 @@ export default {
             subTh.style.background = '#faf9f6';
             subTh.style.borderBottom = '1px solid #b8cdb8';
             subTh.style.fontFamily = FF;
+            subTh.style.textAlign = 'center';
             const subFlex = subTh.querySelector('.sub-flex');
             if (subFlex) {
-              subFlex.style.padding = '6px 10px';
+              subFlex.style.padding = '8px 12px';
+              subFlex.style.display = 'flex';
+              subFlex.style.justifyContent = 'center';
+              subFlex.style.alignItems = 'center';
               subFlex.style.gap = '12px';
               subFlex.style.fontSize = '14px';
               subFlex.style.fontFamily = FF;
               subFlex.style.color = '#6b866b';
+              subFlex.style.textAlign = 'center';
             }
             const midSpan = subTh.querySelector('.es-mid');
-            if (midSpan) { midSpan.style.fontSize = '11px'; midSpan.style.fontFamily = FF; }
+            if (midSpan) { midSpan.style.fontSize = '12px'; midSpan.style.fontFamily = FF; midSpan.style.textAlign = 'center'; }
             ['es-left','es-right'].forEach(cls => {
               const s = subTh.querySelector('.' + cls);
               if (s) s.style.fontFamily = FF;
             });
           }
         }
-        // 全克隆体强制衬线字体，避免"没有字体"
         tableClone.style.fontFamily = FF;
         tableClone.style.color = '#2c3e2c';
 
-        // 2c. 重建 tbody：4 列 × numRows。每格强制内联 20px 高度 + 衬线字体
+        // 2c. 重建 tbody：两列 × numRows
         const tbody = tableClone.querySelector('tbody');
         if (tbody) {
           const rows = [];
-          const cellH = 20;
           for (let r = 0; r < numRows; r++) {
             let rowHtml = '<tr style="height:' + cellH + 'px;">';
             for (let c = 0; c < resultCols; c++) {
@@ -789,27 +799,44 @@ export default {
               if (i < data.length) {
                 const p = data[i];
                 rowHtml += `<td class="result-cell" data-id="${this._escapeHtml(p.id)}"
-                  style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:1px 3px;vertical-align:middle;line-height:1.05;font-family:${FF};">
-                  <span class="poem-title" style="font-size:10px;line-height:1.05;font-family:${FF};">${this._escapeHtml(p.title)}</span>
-                  <span class="poem-content" style="font-size:9px;line-height:1.05;font-family:${FF};">${this._escapeHtml(p.content || '')}</span>
+                  style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:2px 6px;vertical-align:middle;line-height:1.25;font-family:${FF};">
+                  <span class="poem-title" style="font-size:${titleFS}px;line-height:1.3;font-family:${FF};">${this._escapeHtml(p.title)}</span>
+                  <span class="poem-content" style="font-size:${contentFS}px;line-height:1.3;font-family:${FF};">${this._escapeHtml(p.content || '')}</span>
                 </td>`;
               } else {
                 rowHtml += `<td class="result-cell empty"
-                  style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:1px 3px;vertical-align:middle;font-family:${FF};">
-                  <span class="result-idx" style="font-size:7px;font-family:${FF};">${i + 1}</span>
+                  style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:2px 6px;vertical-align:middle;font-family:${FF};">
+                  <span class="result-idx" style="font-size:${idxFS}px;font-family:${FF};">${i + 1}</span>
                 </td>`;
               }
             }
             rowHtml += '</tr>';
             rows.push(rowHtml);
           }
+
+          // 末尾一行：居左（制作/筛汇）| 居右（聚友：公众号+QQ）| 居中（域名）；字体稍小
+          const leftStr = '网站制作：蟋蟀  诗文筛汇：嫻菜无敌 蟋蟀';
+          const rightStr = '欢迎关注公众号「东坡墙」QQ「3301590656」';
+          const centerStr = 'www.sudongpo521.cn';
+          const footerRow =
+            `<tr style="height:auto;">
+              <td colspan="2" style="padding:10px 12px 8px;border-top:1px solid #b8cdb8;font-family:${FF};background:#faf9f6;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:${FF};font-size:11px;line-height:1.7;color:#4e5b4e;">
+                  <span style="text-align:left;flex:0 0 auto;">${this._escapeHtml(leftStr)}</span>
+                  <span style="text-align:center;flex:1 1 auto;font-size:11px;">${this._escapeHtml(centerStr)}</span>
+                  <span style="text-align:right;flex:0 0 auto;">${this._escapeHtml(rightStr)}</span>
+                </div>
+              </td>
+            </tr>`;
+          rows.push(footerRow);
+
           tbody.innerHTML = rows.join('');
           tbody.style.fontFamily = FF;
         }
-        // 2d. 克隆体宽：精确 880px。高度由内容自然撑开，html2canvas 用 scrollHeight 精准取值
+
         tableClone.style.tableLayout = 'fixed';
-        tableClone.style.width = '880px';
-        tableClone.style.maxWidth = '880px';
+        tableClone.style.width = totalW + 'px';
+        tableClone.style.maxWidth = totalW + 'px';
         tableClone.style.height = 'auto';
       } else {
         // 淘汰表直接继承原尺寸
