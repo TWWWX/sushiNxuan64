@@ -124,15 +124,16 @@
           <div class="table-wrapper result-wrapper" id="resultWrapper">
             <table class="result-table" id="resultTable">
               <colgroup>
-                <col v-for="n in 4" :key="'c'+n" />
+                <col v-for="n in 2" :key="'c'+n" />
               </colgroup>
-              <!-- 仅导出图片时显示的两行：第1行标题，第2行副栏；日常界面隐藏（.export-header { display:none }），导出前临时显示 -->
+              <!-- 仅导出图片时显示的两行：第1行标题，第2行副栏；日常界面隐藏（.export-only-head { display:none }），导出前临时显示 -->
               <thead class="export-only-head">
                 <tr class="export-row export-row-title">
-                  <th colspan="4" class="export-title-cell">最喜欢的苏轼诗文top64</th>
+                  <!-- 日常显示 2 列 → colspan=2 刚好铺满；导出图片时克隆体会被重写为 colspan=4 -->
+                  <th :colspan="displayCols" class="export-title-cell">最喜欢的苏轼诗文top64</th>
                 </tr>
                 <tr class="export-row export-row-sub">
-                  <th colspan="4" class="export-sub-cell">
+                  <th :colspan="displayCols" class="export-sub-cell">
                     <div class="sub-flex">
                       <span class="es-left">网站制作：蟋蟀 诗文筛汇：嫻菜无敌 蟋蟀</span>
                       <span class="es-mid">欢迎关注公众号「东坡墙」QQ「3301590656」</span>
@@ -142,18 +143,18 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="r in resultRows" :key="'r'+r">
+                <tr v-for="r in resultRowsDisplay" :key="'r'+r">
                   <td
-                    v-for="c in 4"
+                    v-for="c in displayCols"
                     :key="'td'+r+'-'+c"
-                    :class="['result-cell', { empty: !getResultCell(r, c) }]"
-                    @click="removeFromResult(r, c)"
+                    :class="['result-cell', { empty: !getResultCell(r, c, displayCols) }]"
+                    @click="removeFromResult(r, c, displayCols)"
                   >
-                    <template v-if="getResultCell(r, c)">
-                      <span class="poem-title">{{ getResultCell(r, c).title }}</span>
-                      <span class="poem-content">{{ getResultCell(r, c).content }}</span>
+                    <template v-if="getResultCell(r, c, displayCols)">
+                      <span class="poem-title">{{ getResultCell(r, c, displayCols).title }}</span>
+                      <span class="poem-content">{{ getResultCell(r, c, displayCols).content }}</span>
                     </template>
-                    <span v-else class="result-idx">{{ (r - 1) * 4 + c }}</span>
+                    <span v-else class="result-idx">{{ (r - 1) * displayCols + c }}</span>
                   </td>
                 </tr>
               </tbody>
@@ -383,6 +384,13 @@ export default {
       const needed = Math.ceil(Math.max(1, this.selectedIdsOrder.length) / 4);
       return Math.max(16, needed);
     },
+    displayCols() { return 2; },
+    resultRowsDisplay() {
+      const cols = this.displayCols;
+      const needed = Math.ceil(Math.max(1, this.selectedIdsOrder.length) / cols);
+      const minRows = (cols === 2) ? 32 : 16; // 2列至少32行=64格；4列至少16行=64格
+      return Math.max(minRows, needed);
+    },
     elimMultiCol() {
       return this.elimColCount >= 2;
     },
@@ -483,12 +491,12 @@ export default {
       }
     },
 
-    getResultCell(r, c) {
-      const idx = (r - 1) * 4 + (c - 1);
+    getResultCell(r, c, cols = 4) {
+      const idx = (r - 1) * cols + (c - 1);
       return this.result64[idx] || null;
     },
-    removeFromResult(r, c) {
-      const idx = (r - 1) * 4 + (c - 1);
+    removeFromResult(r, c, cols = 4) {
+      const idx = (r - 1) * cols + (c - 1);
       if (idx >= this.selectedIdsOrder.length) return;
       this.selectedIdsOrder.splice(idx, 1);
     },
@@ -706,8 +714,17 @@ export default {
     },
 
     // ===================== 导出PNG（直接对 苏轼诗文TOP64/淘汰表 的表格本身进行截图） =====================
+    // 苏轼诗文TOP64 日常显示 2 列，但在导出图片时会把克隆体强制重排为 4 列（16行 = 64格）
     // 苏轼诗文TOP64 在 <thead class="export-only-head"> 里插入两行（标题 / 副栏），日常隐藏，导出前临时显示。
-    // 淘汰表按同样思路：截图整个 table。
+    _escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    },
     async _exportPNGDirect({ wrapperId, tableId, mode }) {
       const wrapper = document.getElementById(wrapperId);
       const table = document.getElementById(tableId);
@@ -738,7 +755,6 @@ export default {
       await new Promise(r => setTimeout(r, 120));
 
       // ---- 2. 把原 table 克隆一个独立副本，放到 body 最左（-99999px），避免屏幕外/滚动问题 ----
-      //   （为什么不直接截原table？因为原table在 grid 容器内，可能因横向滚动条造成 html2canvas 只截可见部分）
       const cloneWrap = document.createElement('div');
       cloneWrap.style.position = 'absolute';
       cloneWrap.style.left = '-99999px';
@@ -746,35 +762,111 @@ export default {
       cloneWrap.style.background = '#ffffff';
       cloneWrap.style.zIndex = '1';
       const tableClone = table.cloneNode(true);
-      // 克隆体要继承真实尺寸，但不能受页面 CSS 影响；把 wrapper 的实际宽度给 cloneWrap
-      const realWidth = Math.ceil(table.getBoundingClientRect().width);
-      tableClone.style.tableLayout = 'fixed';
-      tableClone.style.width = realWidth + 'px';
-      // 克隆体可能失去 border-collapse 状态/行高，重置一下
-      tableClone.querySelectorAll('th').forEach(th => { th.style.position = 'static'; });
-      // 如果是 resultTable，要确保 export head 两行已正确克隆（已在 display:table-header-group 时 clone，自然包含）
+      // -------- 【重点】如果是 TOP64 结果表：把克隆体 2 列 → 强制重建为 4 列 --------
+      const isResult = (tableId === 'resultTable');
+      if (isResult) {
+        const resultCols = 4;
+        const data = this.result64.slice();
+        // 精确行数：实际需要多少画多少，不再强制 16 行，空行就不会出现 -> 消灭底部大段空白
+        const numRows = Math.max(1, Math.ceil(data.length / resultCols));
+
+        // 2a. colgroup = 4 列
+        const cg = tableClone.querySelector('colgroup');
+        if (cg) cg.innerHTML = '<col><col><col><col>';
+
+        // 2b. export-only-head colspan 改成 4，并把两行标题/副栏样式调成紧凑版
+        const eHead = tableClone.querySelector('thead.export-only-head');
+        if (eHead) {
+          eHead.querySelectorAll('th').forEach(th => { th.setAttribute('colspan', '4'); });
+          const titleTh = eHead.querySelector('.export-title-cell');
+          if (titleTh) { titleTh.style.padding = '12px 10px 6px'; titleTh.style.fontSize = '22px'; titleTh.style.letterSpacing = '3px'; }
+          const subTh = eHead.querySelector('.export-sub-cell');
+          if (subTh) {
+            subTh.style.padding = '0';
+            subTh.style.fontSize = '12px';
+            const subFlex = subTh.querySelector('.sub-flex');
+            if (subFlex) { subFlex.style.padding = '4px 8px'; subFlex.style.gap = '8px'; }
+            const midSpan = subTh.querySelector('.es-mid');
+            if (midSpan) midSpan.style.fontSize = '10px';
+          }
+        }
+
+        // 2c. 重建 tbody：4 列 × numRows。每格强制内联 20px 高度，避免命中页面 CSS 媒体查询的 37/27 行高
+        const tbody = tableClone.querySelector('tbody');
+        if (tbody) {
+          const rows = [];
+          const cellH = 20;
+          for (let r = 0; r < numRows; r++) {
+            let rowHtml = '<tr style="height:' + cellH + 'px;">';
+            for (let c = 0; c < resultCols; c++) {
+              const i = r * resultCols + c;
+              if (i < data.length) {
+                const p = data[i];
+                rowHtml += `<td class="result-cell" data-id="${this._escapeHtml(p.id)}"
+                  style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:1px 3px;vertical-align:middle;line-height:1.05;">
+                  <span class="poem-title" style="font-size:10px;line-height:1.05;">${this._escapeHtml(p.title)}</span>
+                  <span class="poem-content" style="font-size:9px;line-height:1.05;">${this._escapeHtml(p.content || '')}</span>
+                </td>`;
+              } else {
+                rowHtml += `<td class="result-cell empty"
+                  style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:1px 3px;vertical-align:middle;">
+                  <span class="result-idx" style="font-size:7px;">${i + 1}</span>
+                </td>`;
+              }
+            }
+            rowHtml += '</tr>';
+            rows.push(rowHtml);
+          }
+          tbody.innerHTML = rows.join('');
+        }
+        // 2d. 克隆体宽：精确 880px。高度由内容自然撑开，html2canvas 用 scrollHeight 精准取值
+        tableClone.style.tableLayout = 'fixed';
+        tableClone.style.width = '880px';
+        tableClone.style.maxWidth = '880px';
+        tableClone.style.height = 'auto';
+      } else {
+        // 淘汰表直接继承原尺寸
+        const realWidth = Math.ceil(table.getBoundingClientRect().width);
+        tableClone.style.tableLayout = 'fixed';
+        tableClone.style.width = realWidth + 'px';
+        tableClone.querySelectorAll('th').forEach(th => { th.style.position = 'static'; });
+      }
       cloneWrap.appendChild(tableClone);
       document.body.appendChild(cloneWrap);
 
+      // 在测量尺寸前给 cloneWrap 显式设置包裹尺寸 = tableClone 的实际尺寸，消除绝对定位下的多余空白
+      cloneWrap.style.width = tableClone.offsetWidth + 'px';
+      cloneWrap.style.height = tableClone.offsetHeight + 'px';
+      cloneWrap.style.overflow = 'hidden';
+      cloneWrap.style.padding = '0';
+      cloneWrap.style.margin = '0';
+      cloneWrap.style.display = 'block';
+
       await this.$nextTick();
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => setTimeout(r, 150));
 
       try {
-        const targetW = cloneWrap.scrollWidth;
-        const targetH = cloneWrap.scrollHeight;
-        if (!targetW || !targetH) throw new Error('导出容器尺寸为 0');
+        // 第二次校准：table 渲染后可能尺寸有微小变化
+        const finalW = tableClone.offsetWidth;
+        const finalH = tableClone.offsetHeight;
+        if (!finalW || !finalH) throw new Error('导出容器尺寸为 0');
+        cloneWrap.style.width = finalW + 'px';
+        cloneWrap.style.height = finalH + 'px';
+
         const canvas = await html2canvas(cloneWrap, {
           backgroundColor: '#ffffff',
           scale: 2,
           useCORS: true,
           allowTaint: true,
           logging: false,
-          width: targetW,
-          height: targetH,
-          windowWidth: targetW + 40,
-          windowHeight: targetH + 40,
+          // 严格使用 cloneWrap 的实际渲染尺寸，html2canvas 不再使用 windowSize 推断
+          width: finalW,
+          height: finalH,
+          windowWidth: finalW,
+          windowHeight: finalH,
           x: 0, y: 0,
           scrollX: 0, scrollY: 0,
+          ignoreElements: () => false,
         });
         if (!canvas || !canvas.width) throw new Error('画布生成失败（空）');
         const dataUrl = canvas.toDataURL('image/png');

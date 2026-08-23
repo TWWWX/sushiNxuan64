@@ -533,10 +533,10 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 .result-wrapper { }
 .result-table {
   width: 100%;
-  min-width: 880px;
+  min-width: 560px; /* 2列模式，每列约 280px，横向滚动起点更低更合理 */
 }
 .result-table colgroup col {
-  min-width: 220px;
+  min-width: 280px; /* 日常 2 列：每列宽一些更好展示标题+内容两行 */
 }
 .result-table th { font-size: 12px; padding: 5px 4px; white-space: nowrap; }
 
@@ -689,8 +689,8 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
     max-height: calc(100vh - 320px + 64px); /* 抵消功能键行 */
     min-height: 484px;
   }
-  .result-table { min-width: 720px; }
-  .result-table colgroup col { min-width: 180px; }
+  .result-table { min-width: 520px; }
+  .result-table colgroup col { min-width: 260px; }
   .result-cell { height: 27px; padding: 1px 2px; vertical-align: middle; }
   .result-cell .poem-title { font-size: 9px; line-height: 1.05; margin-bottom: 0; }
   .result-cell .poem-content { font-size: 8px; line-height: 1.05; }
@@ -790,8 +790,8 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .poem-title { font-size: 10px; margin-bottom: 0; }
   .poem-content { font-size: 9px; }
 
-  .result-table { min-width: 640px; }
-  .result-table colgroup col { min-width: 160px; }
+  .result-table { min-width: 480px; }
+  .result-table colgroup col { min-width: 240px; }
   .result-cell { height: 26px; padding: 1px 2px; vertical-align: middle; }
   .result-cell .poem-title { font-size: 8px; line-height: 1.05; margin-bottom: 0; }
   .result-cell .poem-content { font-size: 7px; line-height: 1.05; }
