@@ -33,32 +33,37 @@
     </div>
 
     <!-- 苏轼诗文N选64 界面 -->
-    <div v-else class="table-page n64-page">
+    <div v-else class="table-page n64-page" id="n64Page">
       <div class="table-page-header">
         <a class="back-link" @click="switchMode(null)">← 返回主页</a>
+        <div class="filler-field">
+          <label class="filler-label" for="fillerInput">填表人：</label>
+          <input
+            id="fillerInput"
+            v-model="fillerName"
+            class="filler-input"
+            type="text"
+            placeholder="请填写您的署名"
+            maxlength="20"
+          />
+        </div>
       </div>
 
       <div class="n64-layout">
         <!-- 诗文库主表 -->
-        <div class="n64-col n64-col-main">
+        <div class="n64-col n64-col-main" id="n64MainCol">
           <div class="table-title-row">
             <div class="title-deco-bar"></div>
             <h2 class="table-page-title">诗文库主表</h2>
             <span class="table-hint">单击 → 选中 &nbsp;|&nbsp; 再次单击 → 取消</span>
             <span class="table-counter">{{ visiblePoems.length }} 首</span>
           </div>
-          <div class="table-wrapper poem-library-wrapper">
-            <table class="poem-library-table">
+          <div class="table-wrapper poem-library-wrapper" id="mainLibraryWrapper">
+            <table class="poem-library-table" id="mainLibraryTable">
               <colgroup>
                 <col style="width:58px" />
                 <col />
               </colgroup>
-              <thead>
-                <tr>
-                  <th>&nbsp;</th>
-                  <th>诗文及内容</th>
-                </tr>
-              </thead>
               <tbody>
                 <template v-for="p in visiblePoems" :key="'grp-'+p.id">
                   <tr
@@ -107,16 +112,20 @@
             <span class="table-hint">单击 → 移除该项</span>
             <span class="table-counter">{{ result64.length }} / 64</span>
           </div>
-          <div class="table-wrapper result-wrapper">
-            <table class="result-table">
+          <div class="action-btn-row">
+            <div class="action-btn-group">
+              <button class="btn btn-png" @click="exportResultPNG">导出图片</button>
+              <button class="btn btn-csv" @click="exportResultCSV">导出CSV</button>
+              <button class="btn btn-upload" :disabled="uploadingResult" @click="onUploadResult">
+                {{ uploadingResult ? '上传中...' : '上传CSV' }}
+              </button>
+            </div>
+          </div>
+          <div class="table-wrapper result-wrapper" id="resultWrapper">
+            <table class="result-table" id="resultTable">
               <colgroup>
                 <col v-for="n in 4" :key="'c'+n" />
               </colgroup>
-              <thead>
-                <tr>
-                  <th v-for="n in 4" :key="'th'+n">结果{{ n }}</th>
-                </tr>
-              </thead>
               <tbody>
                 <tr v-for="r in resultRows" :key="'r'+r">
                   <td
@@ -145,19 +154,21 @@
             <span class="table-hint">单击 → 回到诗文表</span>
             <span class="table-counter">{{ eliminated.length }} 首</span>
           </div>
-          <div class="table-wrapper elim-wrapper">
-            <table class="elim-table" :class="{ 'elim-multi': elimMultiCol }">
+          <div class="action-btn-row">
+            <div class="action-btn-group">
+              <button class="btn btn-png" @click="exportElimPNG">导出图片</button>
+              <button class="btn btn-csv" @click="exportElimCSV">导出CSV</button>
+              <button class="btn btn-upload" :disabled="uploadingElim" @click="onUploadElim">
+                {{ uploadingElim ? '上传中...' : '上传CSV' }}
+              </button>
+            </div>
+          </div>
+          <div class="table-wrapper elim-wrapper" id="elimWrapper">
+            <table class="elim-table" id="elimTable" :class="{ 'elim-multi': elimMultiCol }">
               <colgroup v-if="elimMultiCol">
                 <col v-for="n in elimColCount" :key="'ec'+n" />
               </colgroup>
               <colgroup v-else><col /></colgroup>
-              <thead>
-                <tr>
-                  <th :colspan="elimMultiCol ? elimColCount : 1">
-                    已淘汰（单击 → 回到诗文表）
-                  </th>
-                </tr>
-              </thead>
               <tbody>
                 <template v-if="elimMultiCol">
                   <tr v-for="(row, ri) in elimGrid" :key="'er'+ri">
@@ -188,10 +199,32 @@
         </div>
       </div>
     </div>
+
+    <!-- 真人自证弹窗：首次点击任何上传按钮时弹出；内容写入CSV首行 -->
+    <div v-if="showAuthModal" class="auth-mask" @click.self="cancelAuthModal">
+      <div class="auth-box">
+        <h3 class="auth-title">自证是真人</h3>
+        <p class="auth-desc">
+          为了防止人机刷票，请写一段关于苏轼的自己的话以证明您是真人，我们将根据您的自证决定是否采纳您提交的数据上榜。
+        </p>
+        <textarea
+          v-model="authText"
+          class="auth-textarea"
+          rows="6"
+          placeholder="例如：东坡先生对我来说是...，他最打动我的作品是...，我最喜欢的一句是..."
+          maxlength="1000"
+        ></textarea>
+        <div class="auth-footer">
+          <button class="btn" @click="cancelAuthModal">取消</button>
+          <button class="btn btn-upload" :disabled="!authText.trim()" @click="confirmAuth">写入并继续上传</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import html2canvas from 'html2canvas';
 import poemSource from '../苏轼诗文精选.txt?raw';
 import csvSource from '../苏轼诗文精选.csv?raw';
 
@@ -289,7 +322,14 @@ export default {
       mouseTarget: null,
       mouseStartX: 0,
       mouseMoved: false,
-      ignoreNextClickId: null
+      ignoreNextClickId: null,
+      fillerName: '',
+      uploadingResult: false,
+      uploadingElim: false,
+      showAuthModal: false,
+      authText: '',
+      pendingUploadKind: null,
+      authCompleted: false,
     };
   },
   computed: {
@@ -514,7 +554,318 @@ export default {
       if (i !== -1) this.eliminatedIds.splice(i, 1);
       this.swipeDx[p.id] = 0;
       this.$set(p, 'swiping', false);
-    }
+    },
+
+    // ===================== 工具 =====================
+    _formatDate() {
+      const d = new Date();
+      return d.getFullYear() +
+        String(d.getMonth() + 1).padStart(2, '0') +
+        String(d.getDate()).padStart(2, '0') + '_' +
+        String(d.getHours()).padStart(2, '0') +
+        String(d.getMinutes()).padStart(2, '0');
+    },
+    _csvEscape(s) {
+      if (s === null || s === undefined) return '""';
+      const x = String(s);
+      if (x.includes(',') || x.includes('"') || x.includes('\n') || x.includes('\r')) {
+        return '"' + x.replace(/"/g, '""') + '"';
+      }
+      return x;
+    },
+    _getSafeFillerName() {
+      const s = (this.fillerName || '').trim();
+      return s || '未署名';
+    },
+
+    // ===================== CSV 构建 =====================
+    // 64结果表：首行=自证语/填表人；次行=表头（序号1..N 或 1..64 列号分4组展示，这里用平铺64列）
+    //   之后每行=数据（按顺序编号 title content）
+    _buildResultCSV() {
+      const firstLine = this.authText ? '【自证】' + this.authText :
+        '【填表人】' + this._getSafeFillerName();
+      const COL = 4;
+      const N = Math.max(64, this.result64.length);
+      const head = [];
+      for (let i = 1; i <= N; i++) head.push('第' + i + '篇');
+      const dataRows = [];
+      const poemRows = Math.ceil(N / COL);
+      for (let r = 1; r <= poemRows; r++) {
+        const row = [];
+        for (let c = 1; c <= COL; c++) {
+          const idx = (r - 1) * COL + c - 1;
+          const p = this.result64[idx];
+          if (p) row.push((p.title || '') + ' ' + (p.content || ''));
+          else row.push('');
+        }
+        dataRows.push(row);
+      }
+      const lines = [];
+      lines.push([firstLine].concat(new Array(head.length - 1).fill('')).map(this._csvEscape).join(','));
+      lines.push(head.map(this._csvEscape).join(','));
+      // 填表人信息行（第3行放填报表相关信息）
+      const infoRow = ['填表人：' + this._getSafeFillerName(), '数量：' + this.result64.length, '提交时间：' + new Date().toLocaleString()];
+      while (infoRow.length < head.length) infoRow.push('');
+      lines.push(infoRow.map(this._csvEscape).join(','));
+      for (const r of dataRows) {
+        while (r.length < head.length) r.push('');
+        lines.push(r.map(this._csvEscape).join(','));
+      }
+      return '\uFEFF' + lines.join('\r\n');
+    },
+
+    // 淘汰表：首行=自证/填表人；次行=表头（按多列或单列表头）；后续=数据
+    _buildElimCSV() {
+      const firstLine = this.authText ? '【自证】' + this.authText :
+        '【填表人】' + this._getSafeFillerName();
+      const cols = this.elimMultiCol ? this.elimColCount : 1;
+      const N = this.eliminated.length;
+      const head = cols === 1 ? ['已淘汰（单击可复位）'] :
+        Array.from({ length: cols }, (_, i) => '第' + (i + 1) + '组');
+      const totalCol = head.length;
+      const poemRows = Math.ceil(N / Math.max(1, totalCol));
+      const rows = [];
+      for (let r = 0; r < poemRows; r++) {
+        const row = [];
+        for (let c = 0; c < totalCol; c++) {
+          const p = this.eliminated[r * totalCol + c];
+          row.push(p ? (p.title + ' ' + p.content) : '');
+        }
+        rows.push(row);
+      }
+      const lines = [];
+      lines.push([firstLine].concat(new Array(totalCol - 1).fill('')).map(this._csvEscape).join(','));
+      lines.push(head.map(this._csvEscape).join(','));
+      const infoRow = ['填表人：' + this._getSafeFillerName(), '数量：' + N, '提交时间：' + new Date().toLocaleString()];
+      while (infoRow.length < totalCol) infoRow.push('');
+      lines.push(infoRow.map(this._csvEscape).join(','));
+      for (const r of rows) lines.push(r.map(this._csvEscape).join(','));
+      return '\uFEFF' + lines.join('\r\n');
+    },
+
+    // ===================== 下载CSV =====================
+    _downloadCSV(csvStr, suffix) {
+      const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const name = this._getSafeFillerName() + '_苏轼N选64_' + suffix + '_' + this._formatDate() + '.csv';
+      link.href = URL.createObjectURL(blob);
+      link.download = name;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    },
+    exportResultCSV() {
+      this._downloadCSV(this._buildResultCSV(), '64结果表');
+    },
+    exportElimCSV() {
+      this._downloadCSV(this._buildElimCSV(), '淘汰表');
+    },
+
+    // ===================== 导出PNG（参考sushishicijingxuan：标题+副栏+表格克隆） =====================
+    async _exportPNGCommon({ wrapperId, tableId, title, subLeft, subMid, mode }) {
+      const wrapper = document.getElementById(wrapperId);
+      const table = document.getElementById(tableId);
+      if (!wrapper || !table) { alert('未找到表格容器'); return; }
+      const safeName = this._getSafeFillerName();
+      const prevOverflow = wrapper.style.overflow;
+      const prevMaxH = wrapper.style.maxHeight;
+      const prevH = wrapper.style.height;
+      wrapper.style.overflow = 'visible';
+      wrapper.style.maxHeight = 'none';
+      wrapper.style.height = 'auto';
+      await new Promise(r => setTimeout(r, 80));
+
+      const fontStack = '"Noto Serif SC", "Songti SC", "SimSun", "STSong", serif';
+      const cont = document.createElement('div');
+      cont.style.background = '#f5f3ef';
+      cont.style.padding = '16px';
+      cont.style.width = 'max-content';
+      cont.style.fontFamily = fontStack;
+
+      const tDiv = document.createElement('div');
+      tDiv.style.textAlign = 'center';
+      tDiv.style.color = '#2c3e2c';
+      tDiv.style.fontSize = '26px';
+      tDiv.style.fontWeight = '700';
+      tDiv.style.letterSpacing = '4px';
+      tDiv.style.padding = '16px 10px 8px';
+      tDiv.style.borderBottom = '1px solid #b8cdb8';
+      tDiv.style.background = '#faf9f6';
+      tDiv.style.fontFamily = fontStack;
+      tDiv.textContent = title || '苏轼作品';
+      cont.appendChild(tDiv);
+
+      const sDiv = document.createElement('div');
+      sDiv.style.display = 'flex';
+      sDiv.style.justifyContent = 'space-between';
+      sDiv.style.alignItems = 'center';
+      sDiv.style.color = '#6b866b';
+      sDiv.style.padding = '6px 10px';
+      sDiv.style.fontWeight = '400';
+      sDiv.style.background = '#faf9f6';
+      sDiv.style.borderBottom = '1px solid #b8cdb8';
+      sDiv.style.fontSize = '14px';
+      sDiv.style.fontFamily = fontStack;
+      const left = document.createElement('span');
+      left.style.textAlign = 'left'; left.style.flex = '1';
+      left.textContent = subLeft || '网站制作：蟋蟀 诗文筛汇：嫻菜无敌 蟋蟀';
+      sDiv.appendChild(left);
+      const mid = document.createElement('span');
+      mid.style.textAlign = 'center'; mid.style.flex = '1'; mid.style.fontSize = '11px';
+      mid.textContent = subMid || '欢迎关注公众号「东坡墙」QQ「3301590656」';
+      sDiv.appendChild(mid);
+      const right = document.createElement('span');
+      right.style.textAlign = 'right'; right.style.flex = '1';
+      right.textContent = '填表人：' + safeName;
+      sDiv.appendChild(right);
+      cont.appendChild(sDiv);
+
+      const clone = table.cloneNode(true);
+      clone.style.zoom = '1';
+      clone.querySelectorAll('th').forEach(th => { th.style.position = 'static'; th.style.borderRadius = '0'; });
+      cont.appendChild(clone);
+
+      document.body.appendChild(cont);
+      await new Promise(r => setTimeout(r, 60));
+      try {
+        const canvas = await html2canvas(cont, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          windowWidth: cont.scrollWidth + 40,
+          windowHeight: cont.scrollHeight + 40,
+        });
+        canvas.toBlob((blob) => {
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = this._getSafeFillerName() + '_苏轼N选64_' + mode + '_' + this._formatDate() + '.png';
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        }, 'image/png');
+      } catch (err) {
+        console.error(err);
+        alert('导出图片失败：' + err.message);
+      } finally {
+        if (cont.parentNode) cont.parentNode.removeChild(cont);
+        wrapper.style.overflow = prevOverflow;
+        wrapper.style.maxHeight = prevMaxH;
+        wrapper.style.height = prevH;
+      }
+    },
+    exportResultPNG() {
+      this._exportPNGCommon({
+        wrapperId: 'resultWrapper',
+        tableId: 'resultTable',
+        title: '最喜欢的苏轼诗文top64',
+        subLeft: '网站制作：蟋蟀 诗文筛汇：嫻菜无敌 蟋蟀',
+        subMid: '欢迎关注公众号「东坡墙」QQ「3301590656」',
+        mode: '结果表'
+      });
+    },
+    exportElimPNG() {
+      this._exportPNGCommon({
+        wrapperId: 'elimWrapper',
+        tableId: 'elimTable',
+        title: '最喜欢的苏轼诗文top64',
+        subLeft: '网站制作：蟋蟀 诗文筛汇：嫻菜无敌 蟋蟀',
+        subMid: '欢迎关注公众号「东坡墙」QQ「3301590656」',
+        mode: '淘汰表'
+      });
+    },
+
+    // ===================== 自证弹窗 + 上传 =====================
+    cancelAuthModal() {
+      this.showAuthModal = false;
+      this.authText = '';
+      this.pendingUploadKind = null;
+    },
+    confirmAuth() {
+      if (!this.authText.trim()) return;
+      this.authCompleted = true;
+      this.showAuthModal = false;
+      const kind = this.pendingUploadKind;
+      this.pendingUploadKind = null;
+      if (kind === 'result') this._doUploadResult();
+      else if (kind === 'elim') this._doUploadElim();
+    },
+    // 首次点击上传 -> 弹自证；自证完成后再次直接上传
+    _requireAuthOrProceed(kind) {
+      if (this.authCompleted) return true;
+      this.pendingUploadKind = kind;
+      this.authText = '';
+      this.showAuthModal = true;
+      return false;
+    },
+    onUploadResult() {
+      if (!(this.fillerName || '').trim()) {
+        alert('需填写填表人');
+        return;
+      }
+      if (this.result64.length !== 64) {
+        alert('为排行榜公平性考虑，只接受诗文数量为64篇的数据');
+        return;
+      }
+      if (!this._requireAuthOrProceed('result')) return;
+      this._doUploadResult();
+    },
+    onUploadElim() {
+      if (!(this.fillerName || '').trim()) {
+        alert('需填写填表人');
+        return;
+      }
+      if (this.eliminated.length === 0) {
+        alert('淘汰表为空，无法上传');
+        return;
+      }
+      if (!this._requireAuthOrProceed('elim')) return;
+      this._doUploadElim();
+    },
+    async _uploadBlob(blob, fileName, folder) {
+      const url = '/api/upload?fileName=' + encodeURIComponent(fileName) +
+        '&folder=' + encodeURIComponent(folder);
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('获取上传地址失败(' + r.status + ')');
+      const { signedUrl } = await r.json();
+      if (!signedUrl) throw new Error('未获取到上传地址');
+      const put = await fetch(signedUrl, {
+        method: 'PUT',
+        body: blob,
+        headers: { 'Content-Type': 'text/csv;charset=utf-8' }
+      });
+      if (!put.ok) throw new Error('上传失败(' + put.status + '): ' + put.statusText);
+    },
+    async _doUploadResult() {
+      if (this.uploadingResult) return;
+      this.uploadingResult = true;
+      try {
+        const csv = this._buildResultCSV();
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const name = this._getSafeFillerName() + '_苏轼N选64_64结果表_' + this._formatDate() + '.csv';
+        await this._uploadBlob(blob, name, 'shiwen-nxuan64');
+        alert('64结果表上传成功，感谢您的投稿！');
+      } catch (err) {
+        console.error(err);
+        alert('上传失败：' + err.message);
+      } finally {
+        this.uploadingResult = false;
+      }
+    },
+    async _doUploadElim() {
+      if (this.uploadingElim) return;
+      this.uploadingElim = true;
+      try {
+        const csv = this._buildElimCSV();
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const name = this._getSafeFillerName() + '_苏轼N选64_淘汰表_' + this._formatDate() + '.csv';
+        await this._uploadBlob(blob, name, 'shiwen-eliminated');
+        alert('淘汰表上传成功，感谢您的投稿！');
+      } catch (err) {
+        console.error(err);
+        alert('上传失败：' + err.message);
+      } finally {
+        this.uploadingElim = false;
+      }
+    },
   }
 };
 </script>

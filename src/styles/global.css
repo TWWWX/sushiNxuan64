@@ -145,6 +145,132 @@ body {
 }
 .back-link:hover { color: #2c3e2c; text-decoration: underline; }
 
+/* 返回主页行：填表人输入框靠右 */
+.filler-field {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.filler-label {
+  font-size: 14px;
+  color: #2c3e2c;
+  font-weight: 500;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.filler-input {
+  padding: 6px 10px;
+  border: 1px solid #b8cdb8;
+  font-size: 13px;
+  outline: none;
+  background: #fff;
+  color: #2c3e2c;
+  width: 200px;
+  font-family: inherit;
+}
+.filler-input::placeholder { color: #b8cdb8; }
+.filler-input:focus { border-color: #4a7a52; }
+
+/* 64结果表 / 淘汰表：标题与表格之间的3功能键，居中横排 */
+.action-btn-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0 12px;
+}
+.action-btn-group {
+  display: inline-flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 8px 12px;
+  background: #faf9f6;
+  border: 1px solid #b8cdb8;
+}
+
+/* 按钮基础样式（参考 sushishicijingxuan design.md） */
+.btn {
+  padding: 6px 14px;
+  border: 1px solid #b8cdb8;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+  background: #fff;
+  color: #2c3e2c;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) { background: #f5f8f4; border-color: #4a7a52; }
+.btn:active:not(:disabled) { background: #e3f1e5; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-png { background: #fff; color: #2c3e2c; }
+.btn-csv { background: #fff; color: #2c3e2c; }
+.btn-upload { background: #fff; color: #2c3e2c; }
+
+/* 真人自证弹窗 */
+.auth-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 62, 44, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+.auth-box {
+  background: #faf9f6;
+  border: 1px solid #b8cdb8;
+  width: 100%;
+  max-width: 560px;
+  padding: 24px 26px;
+  box-sizing: border-box;
+  box-shadow: 0 12px 40px rgba(44, 62, 44, 0.2);
+}
+.auth-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #2c3e2c;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #b8cdb8;
+}
+.auth-desc {
+  font-size: 13px;
+  color: #4a7a52;
+  line-height: 1.7;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px dashed #b8cdb8;
+}
+.auth-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #b8cdb8;
+  font-size: 13px;
+  font-family: inherit;
+  color: #2c3e2c;
+  line-height: 1.7;
+  background: #fff;
+  resize: vertical;
+  outline: none;
+}
+.auth-textarea:focus { border-color: #4a7a52; }
+.auth-textarea::placeholder { color: #b8cdb8; }
+.auth-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
 /* ==================== 标题行通用 —— 三表统一结构：[色条 标题] 注释(中间) 数量(最右) ==================== */
 .table-title-row {
   display: flex;
@@ -450,6 +576,30 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 @media (max-width: 899px) {
   #app-root { max-width: 100%; padding: 36px 28px; margin: 0; }
 
+  .table-page-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+  .filler-field {
+    margin-left: auto;
+    width: auto;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .filler-label { font-size: 12px; letter-spacing: 0; }
+  .filler-input {
+    width: 140px;
+    max-width: 40vw;
+    padding: 5px 8px;
+    font-size: 12px;
+    flex: 0 0 auto;
+  }
+  .back-link { font-size: 12px; letter-spacing: 0; white-space: nowrap; flex-shrink: 0; }
+  .action-btn-group { padding: 6px 8px; gap: 6px; }
+  .action-btn-group .btn { padding: 5px 10px; font-size: 11px; letter-spacing: 0; }
+
   .n64-layout {
     grid-template-columns: 1fr;
     max-width: 100%;
@@ -530,6 +680,19 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 /* ==================== 700px 小屏进一步压缩 ==================== */
 @media (max-width: 700px) {
   #app-root { padding: 28px 20px; max-width: 100%; }
+  .table-page-header { gap: 6px; }
+  .filler-label { font-size: 11px; }
+  .filler-input {
+    width: 110px;
+    max-width: 36vw;
+    font-size: 11px;
+    padding: 4px 7px;
+  }
+  .back-link { font-size: 11px; }
+  .auth-box { padding: 18px 16px; }
+  .auth-title { font-size: 15px; }
+  .auth-desc { font-size: 12px; line-height: 1.6; padding: 8px 10px; }
+  .action-btn-group .btn { padding: 5px 8px; font-size: 11px; letter-spacing: 0; }
   .home-title-row { gap: 8px; }
   .title-line { display: none; }
   .home-title { font-size: 18px; letter-spacing: 4px; }
