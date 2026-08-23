@@ -777,7 +777,9 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 
   .n64-layout { gap: 18px; }
 
-  .table-page-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .table-page-header { flex-direction: row; align-items: center; flex-wrap: nowrap; gap: 4px; }
+  .filler-field { gap: 5px; }
+  .filler-label { letter-spacing: 0; }
   .table-title-row { flex-wrap: wrap; gap: 8px; }
   .table-hint,
   .table-counter { margin-left: 0; width: auto; font-size: 10px; flex: 1 1 auto; }

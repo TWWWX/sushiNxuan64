@@ -50,11 +50,11 @@
       </div>
 
       <div class="n64-layout">
-        <!-- 诗文库主表 -->
+        <!-- 苏轼经典诗文一览 -->
         <div class="n64-col n64-col-main" id="n64MainCol">
           <div class="table-title-row">
             <div class="title-deco-bar"></div>
-            <h2 class="table-page-title">诗文库主表</h2>
+            <h2 class="table-page-title">苏轼经典诗文一览</h2>
             <span class="table-hint">单击 → 选中 &nbsp;|&nbsp; 再次单击 → 取消</span>
             <span class="table-counter">{{ visiblePoems.length }} 首</span>
           </div>
@@ -104,13 +104,13 @@
           </div>
         </div>
 
-        <!-- 64结果表 -->
+        <!-- 苏轼诗文TOP64 -->
         <div class="n64-col n64-col-result">
           <div class="table-title-row">
             <div class="title-deco-bar"></div>
-            <h2 class="table-page-title">64结果表</h2>
+            <h2 class="table-page-title">苏轼诗文TOP64</h2>
             <span class="table-hint">单击 → 移除该项</span>
-            <span class="table-counter">{{ result64.length }} / 64</span>
+            <span class="table-counter">{{ result64.length }}首 / 64首</span>
           </div>
           <div class="action-btn-row">
             <div class="action-btn-group">
@@ -624,7 +624,7 @@ export default {
     },
 
     // ===================== CSV 构建 =====================
-    // 64结果表：首行=自证语/填表人；次行=表头（序号1..N 或 1..64 列号分4组展示，这里用平铺64列）
+    // 苏轼诗文TOP64：首行=自证语/填表人；次行=表头（序号1..N 分4列组展示）
     //   之后每行=数据（按顺序编号 title content）
     _buildResultCSV() {
       const firstLine = this.authText ? '【自证】' + this.authText :
@@ -699,14 +699,14 @@ export default {
       setTimeout(() => URL.revokeObjectURL(link.href), 1000);
     },
     exportResultCSV() {
-      this._downloadCSV(this._buildResultCSV(), '64结果表');
+      this._downloadCSV(this._buildResultCSV(), '苏轼诗文TOP64');
     },
     exportElimCSV() {
       this._downloadCSV(this._buildElimCSV(), '淘汰表');
     },
 
-    // ===================== 导出PNG（直接对 64结果表/淘汰表 的表格本身进行截图） =====================
-    // 64结果表在 <thead class="export-only-head"> 里插入两行（标题 / 副栏），日常隐藏，导出前临时显示。
+    // ===================== 导出PNG（直接对 苏轼诗文TOP64/淘汰表 的表格本身进行截图） =====================
+    // 苏轼诗文TOP64 在 <thead class="export-only-head"> 里插入两行（标题 / 副栏），日常隐藏，导出前临时显示。
     // 淘汰表按同样思路：截图整个 table。
     async _exportPNGDirect({ wrapperId, tableId, mode }) {
       const wrapper = document.getElementById(wrapperId);
@@ -806,7 +806,7 @@ export default {
       this._exportPNGDirect({
         wrapperId: 'resultWrapper',
         tableId: 'resultTable',
-        mode: '结果表'
+        mode: '苏轼诗文TOP64'
       });
     },
     exportElimPNG() {
@@ -847,7 +847,7 @@ export default {
         return;
       }
       if (this.result64.length !== 64) {
-        this.showMsg('为排行榜公平性考虑', '只接受诗文数量为64篇的数据，请将 64结果表 调整为正好 64 篇后再上传。');
+        this.showMsg('为排行榜公平性考虑', '只接受诗文数量为64首的数据，请将 苏轼诗文TOP64 调整为正好 64 首后再上传。');
         return;
       }
       if (!this._requireAuthOrProceed('result')) return;
@@ -917,15 +917,15 @@ export default {
       try {
         const csv = this._buildResultCSV();
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const name = this._getSafeFillerName() + '_苏轼N选64_64结果表_' + this._formatDate() + '.csv';
+        const name = this._getSafeFillerName() + '_苏轼N选64_苏轼诗文TOP64_' + this._formatDate() + '.csv';
         await this._uploadBlob(blob, name, 'shiwen-nxuan64');
-        this.showMsg('上传成功', '64结果表上传成功，感谢您的投稿！');
+        this.showMsg('上传成功', '上传成功，感谢您的投稿！');
       } catch (err) {
         console.error(err);
         // 兜底：云端上传失败时，提供"本地下载 CSV"作为替代方案
         try {
           const csv = this._buildResultCSV();
-          this._downloadCSV(csv, '64结果表（未上传-本地备份）');
+          this._downloadCSV(csv, '苏轼诗文TOP64（未上传-本地备份）');
           this.showMsg(
             '上传失败（已为您自动生成本地 CSV 备份）',
             (err && err.message ? err.message : String(err)) +
@@ -946,7 +946,7 @@ export default {
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const name = this._getSafeFillerName() + '_苏轼N选64_淘汰表_' + this._formatDate() + '.csv';
         await this._uploadBlob(blob, name, 'shiwen-eliminated');
-        this.showMsg('上传成功', '淘汰表上传成功，感谢您的投稿！');
+        this.showMsg('上传成功', '上传成功，感谢您的投稿！');
       } catch (err) {
         console.error(err);
         try {
