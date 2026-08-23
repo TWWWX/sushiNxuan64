@@ -43,7 +43,7 @@
             v-model="fillerName"
             class="filler-input"
             type="text"
-            placeholder="请填写您的署名"
+            placeholder=""
             maxlength="20"
           />
         </div>
@@ -55,7 +55,7 @@
           <div class="table-title-row">
             <div class="title-deco-bar"></div>
             <h2 class="table-page-title">苏轼经典诗文一览</h2>
-            <span class="table-hint">单击 → 选中 &nbsp;|&nbsp; 再次单击 → 取消</span>
+            <span class="table-hint">单击 → 选中 / 取消</span>
             <span class="table-counter">{{ visiblePoems.length }} 首</span>
           </div>
           <div class="table-wrapper poem-library-wrapper" id="mainLibraryWrapper">
@@ -90,8 +90,7 @@
                     </td>
                   </tr>
                   <tr v-if="expandedId === p.id" :key="'ex-'+p.id" class="expand-row">
-                    <td class="expand-empty"></td>
-                    <td class="expand-body">
+                    <td class="expand-body" colspan="2">
                       <div class="expand-body-inner">
                         <strong class="expand-title">{{ p.title }}</strong>
                         <pre class="expand-content">{{ p.fullText || (p.title + '\n' + p.content) }}</pre>
@@ -124,12 +123,12 @@
           <div class="table-wrapper result-wrapper" id="resultWrapper">
             <table class="result-table" id="resultTable">
               <colgroup>
-                <col v-for="n in 2" :key="'c'+n" />
+                <col v-for="n in displayCols" :key="'c'+n" />
               </colgroup>
               <!-- 仅导出图片时显示的两行：第1行标题，第2行副栏；日常界面隐藏（.export-only-head { display:none }），导出前临时显示 -->
               <thead class="export-only-head">
                 <tr class="export-row export-row-title">
-                  <!-- 日常显示 2 列 → colspan=2 刚好铺满；导出图片时克隆体会被重写为 colspan=4 -->
+                  <!-- 日常显示 1 列 → colspan=1 -->
                   <th :colspan="displayCols" class="export-title-cell">最喜欢的苏轼诗文top64</th>
                 </tr>
                 <tr class="export-row export-row-sub">
@@ -384,11 +383,11 @@ export default {
       const needed = Math.ceil(Math.max(1, this.selectedIdsOrder.length) / 4);
       return Math.max(16, needed);
     },
-    displayCols() { return 2; },
+    displayCols() { return 1; },
     resultRowsDisplay() {
       const cols = this.displayCols;
       const needed = Math.ceil(Math.max(1, this.selectedIdsOrder.length) / cols);
-      const minRows = (cols === 2) ? 32 : 16; // 2列至少32行=64格；4列至少16行=64格
+      const minRows = (cols === 1) ? 64 : (cols === 2 ? 32 : 16); // 1列至少64行=64格
       return Math.max(minRows, needed);
     },
     elimMultiCol() {
@@ -628,19 +627,16 @@ export default {
     },
     _getSafeFillerName() {
       const s = (this.fillerName || '').trim();
-      return s || '未署名';
+      return s || '——';
     },
 
     // ===================== CSV 构建 =====================
-    // 苏轼诗文TOP64：首行=自证语/填表人；次行=表头（序号1..N 分4列组展示）
-    //   之后每行=数据（按顺序编号 title content）
+    // 苏轼诗文TOP64：首行=自证语/填表人；次行=填表人信息；后续=数据行（4列组布局）
     _buildResultCSV() {
       const firstLine = this.authText ? '【自证】' + this.authText :
         '【填表人】' + this._getSafeFillerName();
       const COL = 4;
       const N = Math.max(64, this.result64.length);
-      const head = [];
-      for (let i = 1; i <= N; i++) head.push('第' + i + '篇');
       const dataRows = [];
       const poemRows = Math.ceil(N / COL);
       for (let r = 1; r <= poemRows; r++) {
@@ -654,29 +650,26 @@ export default {
         dataRows.push(row);
       }
       const lines = [];
-      lines.push([firstLine].concat(new Array(head.length - 1).fill('')).map(this._csvEscape).join(','));
-      lines.push(head.map(this._csvEscape).join(','));
-      // 填表人信息行（第3行放填报表相关信息）
+      lines.push([firstLine].concat(new Array(COL - 1).fill('')).map(this._csvEscape).join(','));
+      // 填表人信息行（第2行）
       const infoRow = ['填表人：' + this._getSafeFillerName(), '数量：' + this.result64.length, '提交时间：' + new Date().toLocaleString()];
-      while (infoRow.length < head.length) infoRow.push('');
+      while (infoRow.length < COL) infoRow.push('');
       lines.push(infoRow.map(this._csvEscape).join(','));
       for (const r of dataRows) {
-        while (r.length < head.length) r.push('');
+        while (r.length < COL) r.push('');
         lines.push(r.map(this._csvEscape).join(','));
       }
       return '\uFEFF' + lines.join('\r\n');
     },
 
-    // 淘汰表：首行=自证/填表人；次行=表头（按多列或单列表头）；后续=数据
+    // 淘汰表：首行=自证/填表人；次行=填表人信息；后续=数据
     _buildElimCSV() {
       const firstLine = this.authText ? '【自证】' + this.authText :
         '【填表人】' + this._getSafeFillerName();
       const cols = this.elimMultiCol ? this.elimColCount : 1;
       const N = this.eliminated.length;
-      const head = cols === 1 ? ['已淘汰（单击可复位）'] :
-        Array.from({ length: cols }, (_, i) => '第' + (i + 1) + '组');
-      const totalCol = head.length;
-      const poemRows = Math.ceil(N / Math.max(1, totalCol));
+      const totalCol = Math.max(1, cols);
+      const poemRows = Math.ceil(N / totalCol);
       const rows = [];
       for (let r = 0; r < poemRows; r++) {
         const row = [];
@@ -688,7 +681,6 @@ export default {
       }
       const lines = [];
       lines.push([firstLine].concat(new Array(totalCol - 1).fill('')).map(this._csvEscape).join(','));
-      lines.push(head.map(this._csvEscape).join(','));
       const infoRow = ['填表人：' + this._getSafeFillerName(), '数量：' + N, '提交时间：' + new Date().toLocaleString()];
       while (infoRow.length < totalCol) infoRow.push('');
       lines.push(infoRow.map(this._csvEscape).join(','));
@@ -774,24 +766,47 @@ export default {
         const cg = tableClone.querySelector('colgroup');
         if (cg) cg.innerHTML = '<col><col><col><col>';
 
-        // 2b. export-only-head colspan 改成 4，并把两行标题/副栏样式调成紧凑版
+        // 2b. export-only-head colspan 改成 4，按 CSS 原值恢复 padding/字号（不做压缩）
+        const FF = '"Noto Serif SC","Songti SC","SimSun","STSong",serif';
         const eHead = tableClone.querySelector('thead.export-only-head');
         if (eHead) {
-          eHead.querySelectorAll('th').forEach(th => { th.setAttribute('colspan', '4'); });
+          eHead.querySelectorAll('th').forEach(th => { th.setAttribute('colspan', '4'); th.style.fontFamily = FF; });
           const titleTh = eHead.querySelector('.export-title-cell');
-          if (titleTh) { titleTh.style.padding = '12px 10px 6px'; titleTh.style.fontSize = '22px'; titleTh.style.letterSpacing = '3px'; }
+          if (titleTh) {
+            titleTh.style.padding = '16px 10px 8px';
+            titleTh.style.fontSize = '26px';
+            titleTh.style.letterSpacing = '4px';
+            titleTh.style.fontFamily = FF;
+            titleTh.style.background = '#faf9f6';
+            titleTh.style.borderBottom = '1px solid #b8cdb8';
+          }
           const subTh = eHead.querySelector('.export-sub-cell');
           if (subTh) {
             subTh.style.padding = '0';
-            subTh.style.fontSize = '12px';
+            subTh.style.background = '#faf9f6';
+            subTh.style.borderBottom = '1px solid #b8cdb8';
+            subTh.style.fontFamily = FF;
             const subFlex = subTh.querySelector('.sub-flex');
-            if (subFlex) { subFlex.style.padding = '4px 8px'; subFlex.style.gap = '8px'; }
+            if (subFlex) {
+              subFlex.style.padding = '6px 10px';
+              subFlex.style.gap = '12px';
+              subFlex.style.fontSize = '14px';
+              subFlex.style.fontFamily = FF;
+              subFlex.style.color = '#6b866b';
+            }
             const midSpan = subTh.querySelector('.es-mid');
-            if (midSpan) midSpan.style.fontSize = '10px';
+            if (midSpan) { midSpan.style.fontSize = '11px'; midSpan.style.fontFamily = FF; }
+            ['es-left','es-right'].forEach(cls => {
+              const s = subTh.querySelector('.' + cls);
+              if (s) s.style.fontFamily = FF;
+            });
           }
         }
+        // 全克隆体强制衬线字体，避免"没有字体"
+        tableClone.style.fontFamily = FF;
+        tableClone.style.color = '#2c3e2c';
 
-        // 2c. 重建 tbody：4 列 × numRows。每格强制内联 20px 高度，避免命中页面 CSS 媒体查询的 37/27 行高
+        // 2c. 重建 tbody：4 列 × numRows。每格强制内联 20px 高度 + 衬线字体
         const tbody = tableClone.querySelector('tbody');
         if (tbody) {
           const rows = [];
@@ -803,14 +818,14 @@ export default {
               if (i < data.length) {
                 const p = data[i];
                 rowHtml += `<td class="result-cell" data-id="${this._escapeHtml(p.id)}"
-                  style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:1px 3px;vertical-align:middle;line-height:1.05;">
-                  <span class="poem-title" style="font-size:10px;line-height:1.05;">${this._escapeHtml(p.title)}</span>
-                  <span class="poem-content" style="font-size:9px;line-height:1.05;">${this._escapeHtml(p.content || '')}</span>
+                  style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:1px 3px;vertical-align:middle;line-height:1.05;font-family:${FF};">
+                  <span class="poem-title" style="font-size:10px;line-height:1.05;font-family:${FF};">${this._escapeHtml(p.title)}</span>
+                  <span class="poem-content" style="font-size:9px;line-height:1.05;font-family:${FF};">${this._escapeHtml(p.content || '')}</span>
                 </td>`;
               } else {
                 rowHtml += `<td class="result-cell empty"
-                  style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:1px 3px;vertical-align:middle;">
-                  <span class="result-idx" style="font-size:7px;">${i + 1}</span>
+                  style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:1px 3px;vertical-align:middle;font-family:${FF};">
+                  <span class="result-idx" style="font-size:7px;font-family:${FF};">${i + 1}</span>
                 </td>`;
               }
             }
@@ -818,6 +833,7 @@ export default {
             rows.push(rowHtml);
           }
           tbody.innerHTML = rows.join('');
+          tbody.style.fontFamily = FF;
         }
         // 2d. 克隆体宽：精确 880px。高度由内容自然撑开，html2canvas 用 scrollHeight 精准取值
         tableClone.style.tableLayout = 'fixed';

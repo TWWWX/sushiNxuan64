@@ -533,10 +533,10 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 .result-wrapper { }
 .result-table {
   width: 100%;
-  min-width: 560px; /* 2列模式，每列约 280px，横向滚动起点更低更合理 */
+  min-width: 0; /* 1列模式：不再强制横向滚，跟随容器宽度 */
 }
 .result-table colgroup col {
-  min-width: 280px; /* 日常 2 列：每列宽一些更好展示标题+内容两行 */
+  min-width: 100%; /* 日常 1 列：唯一列占满整个表宽度 */
 }
 .result-table th { font-size: 12px; padding: 5px 4px; white-space: nowrap; }
 
@@ -681,16 +681,16 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .result-wrapper,
   .elim-wrapper {
     height: auto;
-    max-height: calc(100vh - 320px);
-    min-height: 420px;
+    max-height: calc((100vh - 320px) * 1.2);
+    min-height: 504px; /* 原 420 × 6/5 */
   }
   .poem-library-wrapper {
     height: auto;
-    max-height: calc(100vh - 320px + 64px); /* 抵消功能键行 */
-    min-height: 484px;
+    max-height: calc((100vh - 320px + 64px) * 1.2);
+    min-height: 581px; /* 原 484 × 6/5 */
   }
-  .result-table { min-width: 520px; }
-  .result-table colgroup col { min-width: 260px; }
+  .result-table { min-width: 0; }
+  .result-table colgroup col { min-width: 100%; }
   .result-cell { height: 27px; padding: 1px 2px; vertical-align: middle; }
   .result-cell .poem-title { font-size: 9px; line-height: 1.05; margin-bottom: 0; }
   .result-cell .poem-content { font-size: 8px; line-height: 1.05; }
@@ -790,8 +790,8 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .poem-title { font-size: 10px; margin-bottom: 0; }
   .poem-content { font-size: 9px; }
 
-  .result-table { min-width: 480px; }
-  .result-table colgroup col { min-width: 240px; }
+  .result-table { min-width: 0; }
+  .result-table colgroup col { min-width: 100%; }
   .result-cell { height: 26px; padding: 1px 2px; vertical-align: middle; }
   .result-cell .poem-title { font-size: 8px; line-height: 1.05; margin-bottom: 0; }
   .result-cell .poem-content { font-size: 7px; line-height: 1.05; }
@@ -799,13 +799,13 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .result-wrapper,
   .elim-wrapper {
     height: auto;
-    max-height: calc(100vh - 320px);
-    min-height: 300px;
+    max-height: calc((100vh - 320px) * 1.2);
+    min-height: 360px; /* 原 300 × 6/5 */
   }
   .poem-library-wrapper {
     height: auto;
-    max-height: calc(100vh - 320px + 60px); /* 抵消功能键行 */
-    min-height: 360px;
+    max-height: calc((100vh - 320px + 60px) * 1.2);
+    min-height: 432px; /* 原 360 × 6/5 */
   }
 
   .elim-cell { padding: 2px 3px; font-size: 10px; }
