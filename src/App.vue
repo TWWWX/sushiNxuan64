@@ -439,7 +439,12 @@ export default {
       }));
     },
     forceRerender() { this.$forceUpdate(); },
-    hashToMode() { return HASH_TO_MODE[window.location.hash] || null; },
+    hashToMode() {
+      const h = window.location.hash;
+      // hash 为空（'' 或 仅 '#'）时默认显示首页（mode = null → v-if="!mode" 展示 homepage）
+      if (!h || h === '#' || h.trim() === '') return null;
+      return HASH_TO_MODE[h] || null;
+    },
     handleHashChange() { this.mode = this.hashToMode(); },
     refreshRandomPoem() {
       const poems = parsePoemsFromTxt(poemSource);
