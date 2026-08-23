@@ -203,20 +203,35 @@
     <!-- 真人自证弹窗：首次点击任何上传按钮时弹出；内容写入CSV首行 -->
     <div v-if="showAuthModal" class="auth-mask" @click.self="cancelAuthModal">
       <div class="auth-box">
-        <h3 class="auth-title">自证是真人</h3>
+        <h3 class="auth-title">请证明你是人类</h3>
         <p class="auth-desc">
-          为了防止人机刷票，请写一段关于苏轼的自己的话以证明您是真人，我们将根据您的自证决定是否采纳您提交的数据上榜。
+          为了防止人机刷票，请写一段关于「自己与苏轼」的话以证明您是人类，我们将根据您的自证决定是否采纳您提交的数据上榜。
+          注意：若使用AI生成，一律不予采纳。
         </p>
         <textarea
           v-model="authText"
           class="auth-textarea"
           rows="6"
-          placeholder="例如：东坡先生对我来说是...，他最打动我的作品是...，我最喜欢的一句是..."
+          placeholder="可以随意发挥，体裁不限，诗歌也可。不少于20字。"
           maxlength="1000"
         ></textarea>
         <div class="auth-footer">
+          <span class="auth-count-tip" :class="{ ok: authText.trim().length >= 20 }">
+            {{ authText.trim().length }} / 20
+          </span>
           <button class="btn" @click="cancelAuthModal">取消</button>
-          <button class="btn btn-upload" :disabled="!authText.trim()" @click="confirmAuth">写入并继续上传</button>
+          <button class="btn btn-upload" :disabled="authText.trim().length < 20" @click="confirmAuth">提交</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 通用提示弹窗（替换 alert）：UI 与自证弹窗一致 -->
+    <div v-if="showMsgModal" class="auth-mask" @click.self="closeMsgModal">
+      <div class="auth-box msg-box">
+        <h3 class="auth-title">{{ msgTitle }}</h3>
+        <p class="auth-desc">{{ msgDesc }}</p>
+        <div class="auth-footer">
+          <button class="btn btn-upload" @click="closeMsgModal">知道了</button>
         </div>
       </div>
     </div>
@@ -330,6 +345,9 @@ export default {
       authText: '',
       pendingUploadKind: null,
       authCompleted: false,
+      showMsgModal: false,
+      msgTitle: '',
+      msgDesc: '',
     };
   },
   computed: {
@@ -556,6 +574,18 @@ export default {
       this.$set(p, 'swiping', false);
     },
 
+    // ===================== 通用提示弹窗 =====================
+    showMsg(title, desc) {
+      this.msgTitle = title || '提示';
+      this.msgDesc = desc || '';
+      this.showMsgModal = true;
+    },
+    closeMsgModal() {
+      this.showMsgModal = false;
+      this.msgTitle = '';
+      this.msgDesc = '';
+    },
+
     // ===================== 工具 =====================
     _formatDate() {
       const d = new Date();
@@ -663,8 +693,7 @@ export default {
     // ===================== 导出PNG（参考sushishicijingxuan：标题+副栏+表格克隆） =====================
     async _exportPNGCommon({ wrapperId, tableId, title, subLeft, subMid, mode }) {
       const wrapper = document.getElementById(wrapperId);
-      const table = document.getElementById(tableId);
-      if (!wrapper || !table) { alert('未找到表格容器'); return; }
+      if (!wrapper) { this.showMsg('提示', '未找到表格容器'); return; }
       const safeName = this._getSafeFillerName();
       const prevOverflow = wrapper.style.overflow;
       const prevMaxH = wrapper.style.maxHeight;
@@ -672,14 +701,25 @@ export default {
       wrapper.style.overflow = 'visible';
       wrapper.style.maxHeight = 'none';
       wrapper.style.height = 'auto';
-      await new Promise(r => setTimeout(r, 80));
+      await this.$nextTick();
+      await new Promise(r => setTimeout(r, 100));
 
       const fontStack = '"Noto Serif SC", "Songti SC", "SimSun", "STSong", serif';
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const exportWidth = Math.ceil(wrapperRect.width) + 32; // + 左右 16 padding
+
       const cont = document.createElement('div');
+      cont.style.position = 'absolute';
+      cont.style.left = '-99999px';
+      cont.style.top = '0';
       cont.style.background = '#f5f3ef';
       cont.style.padding = '16px';
-      cont.style.width = 'max-content';
+      cont.style.width = exportWidth + 'px';
+      cont.style.boxSizing = 'border-box';
       cont.style.fontFamily = fontStack;
+      cont.style.color = '#2c3e2c';
+      cont.style.zIndex = '1';
+      cont.setAttribute('data-export-wrap', '1');
 
       const tDiv = document.createElement('div');
       tDiv.style.textAlign = 'center';
@@ -691,7 +731,9 @@ export default {
       tDiv.style.borderBottom = '1px solid #b8cdb8';
       tDiv.style.background = '#faf9f6';
       tDiv.style.fontFamily = fontStack;
-      tDiv.textContent = title || '苏轼作品';
+      tDiv.style.width = '100%';
+      tDiv.style.boxSizing = 'border-box';
+      tDiv.textContent = title || '最喜欢的苏轼诗文top64';
       cont.appendChild(tDiv);
 
       const sDiv = document.createElement('div');
@@ -705,48 +747,85 @@ export default {
       sDiv.style.borderBottom = '1px solid #b8cdb8';
       sDiv.style.fontSize = '14px';
       sDiv.style.fontFamily = fontStack;
+      sDiv.style.width = '100%';
+      sDiv.style.boxSizing = 'border-box';
+      sDiv.style.gap = '12px';
+      sDiv.style.flexWrap = 'nowrap';
       const left = document.createElement('span');
-      left.style.textAlign = 'left'; left.style.flex = '1';
+      left.style.textAlign = 'left'; left.style.flex = '1 1 auto'; left.style.minWidth = '0';
       left.textContent = subLeft || '网站制作：蟋蟀 诗文筛汇：嫻菜无敌 蟋蟀';
       sDiv.appendChild(left);
       const mid = document.createElement('span');
-      mid.style.textAlign = 'center'; mid.style.flex = '1'; mid.style.fontSize = '11px';
+      mid.style.textAlign = 'center'; mid.style.flex = '1 1 auto'; mid.style.fontSize = '11px'; mid.style.minWidth = '0';
       mid.textContent = subMid || '欢迎关注公众号「东坡墙」QQ「3301590656」';
       sDiv.appendChild(mid);
       const right = document.createElement('span');
-      right.style.textAlign = 'right'; right.style.flex = '1';
+      right.style.textAlign = 'right'; right.style.flex = '1 1 auto'; right.style.minWidth = '0';
       right.textContent = '填表人：' + safeName;
       sDiv.appendChild(right);
       cont.appendChild(sDiv);
 
-      const clone = table.cloneNode(true);
-      clone.style.zoom = '1';
-      clone.querySelectorAll('th').forEach(th => { th.style.position = 'static'; th.style.borderRadius = '0'; });
-      cont.appendChild(clone);
+      const wrapperClone = wrapper.cloneNode(true);
+      wrapperClone.style.overflow = 'visible';
+      wrapperClone.style.maxHeight = 'none';
+      wrapperClone.style.height = 'auto';
+      wrapperClone.style.position = 'static';
+      wrapperClone.style.transform = 'none';
+      wrapperClone.style.width = '100%';
+      wrapperClone.style.margin = '0';
+      // 清掉克隆体里 th 的 sticky，避免被绘制成错位
+      wrapperClone.querySelectorAll('th').forEach(th => {
+        th.style.position = 'static';
+        th.style.borderRadius = '0';
+      });
+      // 诗文库中 absolute expand-btn 的尺寸也要正确：absolute 填充需要单元格有定位
+      wrapperClone.querySelectorAll('.expand-cell').forEach(td => {
+        if (getComputedStyle(td).position === 'static') td.style.position = 'relative';
+      });
+      cont.appendChild(wrapperClone);
 
       document.body.appendChild(cont);
-      await new Promise(r => setTimeout(r, 60));
+      await this.$nextTick();
+      await new Promise(r => setTimeout(r, 150));
+
       try {
+        const targetH = cont.scrollHeight;
+        const targetW = cont.scrollWidth;
         const canvas = await html2canvas(cont, {
           backgroundColor: '#ffffff',
           scale: 2,
           useCORS: true,
+          allowTaint: true,
           logging: false,
-          windowWidth: cont.scrollWidth + 40,
-          windowHeight: cont.scrollHeight + 40,
+          width: targetW,
+          height: targetH,
+          windowWidth: targetW + 40,
+          windowHeight: targetH + 40,
+          x: 0,
+          y: 0,
+          scrollX: 0,
+          scrollY: 0,
         });
-        canvas.toBlob((blob) => {
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(blob);
-          link.download = this._getSafeFillerName() + '_苏轼N选64_' + mode + '_' + this._formatDate() + '.png';
-          link.click();
-          setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-        }, 'image/png');
+        if (!canvas || !canvas.width) throw new Error('画布生成失败（空）');
+        // 改 toDataURL（兼容性好 + 同步下载）
+        const dataUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = this._getSafeFillerName() + '_苏轼N选64_' + mode + '_' + this._formatDate() + '.png';
+        document.body.appendChild(link);
+        link.click();
+        // 立即移除节点 + 释放 data URL（虽然 data URL 可不用 revoke，但部分浏览器占内存）
+        setTimeout(() => {
+          if (link.parentNode) link.parentNode.removeChild(link);
+          if (typeof URL.revokeObjectURL === 'function') {
+            try { URL.revokeObjectURL(dataUrl); } catch (e) { /* ignore */ }
+          }
+        }, 500);
       } catch (err) {
         console.error(err);
-        alert('导出图片失败：' + err.message);
+        this.showMsg('导出图片失败', err && err.message ? err.message : String(err));
       } finally {
-        if (cont.parentNode) cont.parentNode.removeChild(cont);
+        if (cont && cont.parentNode) cont.parentNode.removeChild(cont);
         wrapper.style.overflow = prevOverflow;
         wrapper.style.maxHeight = prevMaxH;
         wrapper.style.height = prevH;
@@ -798,11 +877,11 @@ export default {
     },
     onUploadResult() {
       if (!(this.fillerName || '').trim()) {
-        alert('需填写填表人');
+        this.showMsg('需填写填表人', '请先在页面顶部填写填表人后再进行上传。');
         return;
       }
       if (this.result64.length !== 64) {
-        alert('为排行榜公平性考虑，只接受诗文数量为64篇的数据');
+        this.showMsg('为排行榜公平性考虑', '只接受诗文数量为64篇的数据，请将 64结果表 调整为正好 64 篇后再上传。');
         return;
       }
       if (!this._requireAuthOrProceed('result')) return;
@@ -810,11 +889,11 @@ export default {
     },
     onUploadElim() {
       if (!(this.fillerName || '').trim()) {
-        alert('需填写填表人');
+        this.showMsg('需填写填表人', '请先在页面顶部填写填表人后再进行上传。');
         return;
       }
       if (this.eliminated.length === 0) {
-        alert('淘汰表为空，无法上传');
+        this.showMsg('淘汰表为空', '淘汰表中没有任何诗文，无法上传。');
         return;
       }
       if (!this._requireAuthOrProceed('elim')) return;
@@ -842,10 +921,10 @@ export default {
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const name = this._getSafeFillerName() + '_苏轼N选64_64结果表_' + this._formatDate() + '.csv';
         await this._uploadBlob(blob, name, 'shiwen-nxuan64');
-        alert('64结果表上传成功，感谢您的投稿！');
+        this.showMsg('上传成功', '64结果表上传成功，感谢您的投稿！');
       } catch (err) {
         console.error(err);
-        alert('上传失败：' + err.message);
+        this.showMsg('上传失败', err && err.message ? err.message : String(err));
       } finally {
         this.uploadingResult = false;
       }
@@ -858,10 +937,10 @@ export default {
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const name = this._getSafeFillerName() + '_苏轼N选64_淘汰表_' + this._formatDate() + '.csv';
         await this._uploadBlob(blob, name, 'shiwen-eliminated');
-        alert('淘汰表上传成功，感谢您的投稿！');
+        this.showMsg('上传成功', '淘汰表上传成功，感谢您的投稿！');
       } catch (err) {
         console.error(err);
-        alert('上传失败：' + err.message);
+        this.showMsg('上传失败', err && err.message ? err.message : String(err));
       } finally {
         this.uploadingElim = false;
       }
