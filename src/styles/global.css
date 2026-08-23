@@ -539,6 +539,55 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   min-width: 220px;
 }
 .result-table th { font-size: 12px; padding: 5px 4px; white-space: nowrap; }
+
+/* ===== 64结果表：导出图片专用的两行表头（日常隐藏，只在截图时显示） ===== */
+.export-only-head { display: none; } /* 日常隐藏 — 就是页面上不会多显示这两行 */
+.export-only-head .export-title-cell {
+  padding: 16px 10px 8px;
+  text-align: center;
+  color: #2c3e2c;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  background: #faf9f6;
+  border-bottom: 1px solid #b8cdb8;
+  font-family: "Noto Serif SC", "Songti SC", "SimSun", "STSong", serif;
+}
+.export-only-head .export-sub-cell {
+  padding: 0;
+  background: #faf9f6;
+  border-bottom: 1px solid #b8cdb8;
+  color: #6b866b;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Noto Serif SC", "Songti SC", "SimSun", "STSong", serif;
+}
+.export-only-head .export-sub-cell .sub-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
+  padding: 6px 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.es-left { text-align: left; flex: 1 1 auto; min-width: 0; }
+.es-mid  { text-align: center; flex: 1 1 auto; min-width: 0; font-size: 11px; }
+.es-right{ text-align: right; flex: 1 1 auto; min-width: 0; }
+
+/* 各断点下，导出两行的字号随表格宽度略微缩放，避免导出时溢出 */
+@media (max-width: 899px) {
+  .export-only-head .export-title-cell { font-size: 20px; letter-spacing: 2px; padding: 14px 8px 7px; }
+  .export-only-head .export-sub-cell .sub-flex { font-size: 12px; }
+  .es-mid { font-size: 10px; }
+}
+@media (max-width: 700px) {
+  .export-only-head .export-title-cell { font-size: 16px; letter-spacing: 1px; padding: 12px 6px 6px; }
+  .export-only-head .export-sub-cell .sub-flex { font-size: 11px; padding: 4px 6px; }
+  .es-mid { font-size: 9px; }
+  .export-only-head .export-sub-cell .sub-flex { gap: 6px; }
+}
 .result-cell {
   padding: 1px 2px;
   font-size: 8px;

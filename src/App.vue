@@ -126,6 +126,21 @@
               <colgroup>
                 <col v-for="n in 4" :key="'c'+n" />
               </colgroup>
+              <!-- 仅导出图片时显示的两行：第1行标题，第2行副栏；日常界面隐藏（.export-header { display:none }），导出前临时显示 -->
+              <thead class="export-only-head">
+                <tr class="export-row export-row-title">
+                  <th colspan="4" class="export-title-cell">最喜欢的苏轼诗文top64</th>
+                </tr>
+                <tr class="export-row export-row-sub">
+                  <th colspan="4" class="export-sub-cell">
+                    <div class="sub-flex">
+                      <span class="es-left">网站制作：蟋蟀 诗文筛汇：嫻菜无敌 蟋蟀</span>
+                      <span class="es-mid">欢迎关注公众号「东坡墙」QQ「3301590656」</span>
+                      <span class="es-right">填表人：{{ _getSafeFillerName() }}</span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
               <tbody>
                 <tr v-for="r in resultRows" :key="'r'+r">
                   <td
@@ -690,108 +705,65 @@ export default {
       this._downloadCSV(this._buildElimCSV(), '淘汰表');
     },
 
-    // ===================== 导出PNG（参考sushishicijingxuan：标题+副栏+表格克隆） =====================
-    async _exportPNGCommon({ wrapperId, tableId, title, subLeft, subMid, mode }) {
+    // ===================== 导出PNG（直接对 64结果表/淘汰表 的表格本身进行截图） =====================
+    // 64结果表在 <thead class="export-only-head"> 里插入两行（标题 / 副栏），日常隐藏，导出前临时显示。
+    // 淘汰表按同样思路：截图整个 table。
+    async _exportPNGDirect({ wrapperId, tableId, mode }) {
       const wrapper = document.getElementById(wrapperId);
-      if (!wrapper) { this.showMsg('提示', '未找到表格容器'); return; }
-      const safeName = this._getSafeFillerName();
+      const table = document.getElementById(tableId);
+      if (!wrapper || !table) { this.showMsg('提示', '未找到表格容器'); return; }
+
+      // ---- 1. 展开 wrapper：去掉最大高度限制，显示隐藏的导出表头行 ----
       const prevOverflow = wrapper.style.overflow;
       const prevMaxH = wrapper.style.maxHeight;
       const prevH = wrapper.style.height;
       wrapper.style.overflow = 'visible';
       wrapper.style.maxHeight = 'none';
       wrapper.style.height = 'auto';
+
+      const exportHead = table.querySelector('thead.export-only-head');
+      const prevHeadDisplay = exportHead ? exportHead.style.display : '';
+      let headWasHidden = false;
+      if (exportHead) {
+        const cs = getComputedStyle(exportHead);
+        headWasHidden = (cs.display === 'none');
+        if (headWasHidden) exportHead.style.display = 'table-header-group';
+      }
+      // 清理所有 th 的 sticky 定位，避免截图错位
+      const thFix = table.querySelectorAll('th');
+      const thPrev = [];
+      thFix.forEach(th => { thPrev.push(th.style.position); th.style.position = 'static'; });
+
+      await this.$nextTick();
+      await new Promise(r => setTimeout(r, 120));
+
+      // ---- 2. 把原 table 克隆一个独立副本，放到 body 最左（-99999px），避免屏幕外/滚动问题 ----
+      //   （为什么不直接截原table？因为原table在 grid 容器内，可能因横向滚动条造成 html2canvas 只截可见部分）
+      const cloneWrap = document.createElement('div');
+      cloneWrap.style.position = 'absolute';
+      cloneWrap.style.left = '-99999px';
+      cloneWrap.style.top = '0';
+      cloneWrap.style.background = '#ffffff';
+      cloneWrap.style.zIndex = '1';
+      const tableClone = table.cloneNode(true);
+      // 克隆体要继承真实尺寸，但不能受页面 CSS 影响；把 wrapper 的实际宽度给 cloneWrap
+      const realWidth = Math.ceil(table.getBoundingClientRect().width);
+      tableClone.style.tableLayout = 'fixed';
+      tableClone.style.width = realWidth + 'px';
+      // 克隆体可能失去 border-collapse 状态/行高，重置一下
+      tableClone.querySelectorAll('th').forEach(th => { th.style.position = 'static'; });
+      // 如果是 resultTable，要确保 export head 两行已正确克隆（已在 display:table-header-group 时 clone，自然包含）
+      cloneWrap.appendChild(tableClone);
+      document.body.appendChild(cloneWrap);
+
       await this.$nextTick();
       await new Promise(r => setTimeout(r, 100));
 
-      const fontStack = '"Noto Serif SC", "Songti SC", "SimSun", "STSong", serif';
-      const wrapperRect = wrapper.getBoundingClientRect();
-      const exportWidth = Math.ceil(wrapperRect.width) + 32; // + 左右 16 padding
-
-      const cont = document.createElement('div');
-      cont.style.position = 'absolute';
-      cont.style.left = '-99999px';
-      cont.style.top = '0';
-      cont.style.background = '#f5f3ef';
-      cont.style.padding = '16px';
-      cont.style.width = exportWidth + 'px';
-      cont.style.boxSizing = 'border-box';
-      cont.style.fontFamily = fontStack;
-      cont.style.color = '#2c3e2c';
-      cont.style.zIndex = '1';
-      cont.setAttribute('data-export-wrap', '1');
-
-      const tDiv = document.createElement('div');
-      tDiv.style.textAlign = 'center';
-      tDiv.style.color = '#2c3e2c';
-      tDiv.style.fontSize = '26px';
-      tDiv.style.fontWeight = '700';
-      tDiv.style.letterSpacing = '4px';
-      tDiv.style.padding = '16px 10px 8px';
-      tDiv.style.borderBottom = '1px solid #b8cdb8';
-      tDiv.style.background = '#faf9f6';
-      tDiv.style.fontFamily = fontStack;
-      tDiv.style.width = '100%';
-      tDiv.style.boxSizing = 'border-box';
-      tDiv.textContent = title || '最喜欢的苏轼诗文top64';
-      cont.appendChild(tDiv);
-
-      const sDiv = document.createElement('div');
-      sDiv.style.display = 'flex';
-      sDiv.style.justifyContent = 'space-between';
-      sDiv.style.alignItems = 'center';
-      sDiv.style.color = '#6b866b';
-      sDiv.style.padding = '6px 10px';
-      sDiv.style.fontWeight = '400';
-      sDiv.style.background = '#faf9f6';
-      sDiv.style.borderBottom = '1px solid #b8cdb8';
-      sDiv.style.fontSize = '14px';
-      sDiv.style.fontFamily = fontStack;
-      sDiv.style.width = '100%';
-      sDiv.style.boxSizing = 'border-box';
-      sDiv.style.gap = '12px';
-      sDiv.style.flexWrap = 'nowrap';
-      const left = document.createElement('span');
-      left.style.textAlign = 'left'; left.style.flex = '1 1 auto'; left.style.minWidth = '0';
-      left.textContent = subLeft || '网站制作：蟋蟀 诗文筛汇：嫻菜无敌 蟋蟀';
-      sDiv.appendChild(left);
-      const mid = document.createElement('span');
-      mid.style.textAlign = 'center'; mid.style.flex = '1 1 auto'; mid.style.fontSize = '11px'; mid.style.minWidth = '0';
-      mid.textContent = subMid || '欢迎关注公众号「东坡墙」QQ「3301590656」';
-      sDiv.appendChild(mid);
-      const right = document.createElement('span');
-      right.style.textAlign = 'right'; right.style.flex = '1 1 auto'; right.style.minWidth = '0';
-      right.textContent = '填表人：' + safeName;
-      sDiv.appendChild(right);
-      cont.appendChild(sDiv);
-
-      const wrapperClone = wrapper.cloneNode(true);
-      wrapperClone.style.overflow = 'visible';
-      wrapperClone.style.maxHeight = 'none';
-      wrapperClone.style.height = 'auto';
-      wrapperClone.style.position = 'static';
-      wrapperClone.style.transform = 'none';
-      wrapperClone.style.width = '100%';
-      wrapperClone.style.margin = '0';
-      // 清掉克隆体里 th 的 sticky，避免被绘制成错位
-      wrapperClone.querySelectorAll('th').forEach(th => {
-        th.style.position = 'static';
-        th.style.borderRadius = '0';
-      });
-      // 诗文库中 absolute expand-btn 的尺寸也要正确：absolute 填充需要单元格有定位
-      wrapperClone.querySelectorAll('.expand-cell').forEach(td => {
-        if (getComputedStyle(td).position === 'static') td.style.position = 'relative';
-      });
-      cont.appendChild(wrapperClone);
-
-      document.body.appendChild(cont);
-      await this.$nextTick();
-      await new Promise(r => setTimeout(r, 150));
-
       try {
-        const targetH = cont.scrollHeight;
-        const targetW = cont.scrollWidth;
-        const canvas = await html2canvas(cont, {
+        const targetW = cloneWrap.scrollWidth;
+        const targetH = cloneWrap.scrollHeight;
+        if (!targetW || !targetH) throw new Error('导出容器尺寸为 0');
+        const canvas = await html2canvas(cloneWrap, {
           backgroundColor: '#ffffff',
           scale: 2,
           useCORS: true,
@@ -801,53 +773,47 @@ export default {
           height: targetH,
           windowWidth: targetW + 40,
           windowHeight: targetH + 40,
-          x: 0,
-          y: 0,
-          scrollX: 0,
-          scrollY: 0,
+          x: 0, y: 0,
+          scrollX: 0, scrollY: 0,
         });
         if (!canvas || !canvas.width) throw new Error('画布生成失败（空）');
-        // 改 toDataURL（兼容性好 + 同步下载）
         const dataUrl = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = dataUrl;
         link.download = this._getSafeFillerName() + '_苏轼N选64_' + mode + '_' + this._formatDate() + '.png';
         document.body.appendChild(link);
         link.click();
-        // 立即移除节点 + 释放 data URL（虽然 data URL 可不用 revoke，但部分浏览器占内存）
         setTimeout(() => {
           if (link.parentNode) link.parentNode.removeChild(link);
-          if (typeof URL.revokeObjectURL === 'function') {
-            try { URL.revokeObjectURL(dataUrl); } catch (e) { /* ignore */ }
-          }
+          try { URL.revokeObjectURL(dataUrl); } catch (e) { /* ignore */ }
         }, 500);
       } catch (err) {
         console.error(err);
         this.showMsg('导出图片失败', err && err.message ? err.message : String(err));
       } finally {
-        if (cont && cont.parentNode) cont.parentNode.removeChild(cont);
+        if (cloneWrap && cloneWrap.parentNode) cloneWrap.parentNode.removeChild(cloneWrap);
+        // ---- 3. 还原：隐藏导出表头 + 恢复 wrapper 原属性 + 还原 th sticky ----
+        if (exportHead) {
+          exportHead.style.display = prevHeadDisplay;
+        }
+        thFix.forEach((th, i) => { th.style.position = thPrev[i]; });
         wrapper.style.overflow = prevOverflow;
         wrapper.style.maxHeight = prevMaxH;
         wrapper.style.height = prevH;
       }
     },
     exportResultPNG() {
-      this._exportPNGCommon({
+      this._exportPNGDirect({
         wrapperId: 'resultWrapper',
         tableId: 'resultTable',
-        title: '最喜欢的苏轼诗文top64',
-        subLeft: '网站制作：蟋蟀 诗文筛汇：嫻菜无敌 蟋蟀',
-        subMid: '欢迎关注公众号「东坡墙」QQ「3301590656」',
         mode: '结果表'
       });
     },
     exportElimPNG() {
-      this._exportPNGCommon({
+      // 淘汰表：直接截图表格本体（不加两行标题，保持原貌）
+      this._exportPNGDirect({
         wrapperId: 'elimWrapper',
         tableId: 'elimTable',
-        title: '最喜欢的苏轼诗文top64',
-        subLeft: '网站制作：蟋蟀 诗文筛汇：嫻菜无敌 蟋蟀',
-        subMid: '欢迎关注公众号「东坡墙」QQ「3301590656」',
         mode: '淘汰表'
       });
     },
@@ -902,16 +868,48 @@ export default {
     async _uploadBlob(blob, fileName, folder) {
       const url = '/api/upload?fileName=' + encodeURIComponent(fileName) +
         '&folder=' + encodeURIComponent(folder);
-      const r = await fetch(url);
-      if (!r.ok) throw new Error('获取上传地址失败(' + r.status + ')');
-      const { signedUrl } = await r.json();
-      if (!signedUrl) throw new Error('未获取到上传地址');
+      let r;
+      try {
+        r = await fetch(url);
+      } catch (netErr) {
+        // 比如 CORS 拦、网络断 / 路径 404（vite dev 无后端）
+        throw new Error('网络错误 / 上传接口不可用（' + (netErr && netErr.message ? netErr.message : 'fetch失败') + '）。请确认项目部署到 Cloudflare Pages Functions；本地调试阶段可改成本地下载 CSV。');
+      }
+      let bodyText = '';
+      try { bodyText = await r.text(); } catch (_) { bodyText = ''; }
+      if (!r.ok) {
+        const msg = (bodyText && bodyText.slice(0, 200)) || r.statusText;
+        // CF Pages 构建失败 / 路由不存在时，返回的不是 JSON
+        if (r.status === 404 || /not found/i.test(msg) || /no such file/i.test(msg)) {
+          throw new Error('未找到 /api/upload 接口（状态码 404）。请确认项目已部署到 Cloudflare Pages 并启用 Functions；本地 vite dev 下不会自动处理 functions 目录。');
+        }
+        // 反解 JSON 的错误消息
+        try {
+          const j = JSON.parse(bodyText);
+          if (j && j.error) {
+            throw new Error('获取预签名 URL 失败(' + r.status + '): ' + j.error +
+              ' —— 若是"R2/凭证"相关报错：请在 Cloudflare Pages → Settings → Environment Variables 中检查 CLOUDFLARE_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_BUCKET_NAME 是否已配置并重新部署。');
+          }
+        } catch (_) { /* 非 JSON，用原文本 */ }
+        throw new Error('获取预签名 URL 失败(' + r.status + '): ' + msg);
+      }
+      let json = null;
+      try { json = JSON.parse(bodyText); } catch (e) {
+        throw new Error('上传返回体不是合法 JSON（' + bodyText.slice(0, 120) + '）。请确认已部署 Cloudflare Pages Functions（functions/api/upload.js）而不是纯静态托管。');
+      }
+      const { signedUrl } = json || {};
+      if (!signedUrl) throw new Error('未获取到上传地址（signedUrl 为空）。请登录 Cloudflare Pages → Functions 日志查看具体报错（通常是 R2 环境变量缺失 / S3 import 失败）。');
       const put = await fetch(signedUrl, {
         method: 'PUT',
         body: blob,
         headers: { 'Content-Type': 'text/csv;charset=utf-8' }
       });
-      if (!put.ok) throw new Error('上传失败(' + put.status + '): ' + put.statusText);
+      if (!put.ok) {
+        let putMsg = put.statusText;
+        try { putMsg = await put.text(); } catch (_) {}
+        throw new Error('上传到 R2 失败(' + put.status + '): ' + (putMsg || put.statusText) +
+          ' —— 这一步一般是 R2 桶名写错 / 没有 PutObject 权限 / signedUrl 过期。');
+      }
     },
     async _doUploadResult() {
       if (this.uploadingResult) return;
@@ -924,7 +922,18 @@ export default {
         this.showMsg('上传成功', '64结果表上传成功，感谢您的投稿！');
       } catch (err) {
         console.error(err);
-        this.showMsg('上传失败', err && err.message ? err.message : String(err));
+        // 兜底：云端上传失败时，提供"本地下载 CSV"作为替代方案
+        try {
+          const csv = this._buildResultCSV();
+          this._downloadCSV(csv, '64结果表（未上传-本地备份）');
+          this.showMsg(
+            '上传失败（已为您自动生成本地 CSV 备份）',
+            (err && err.message ? err.message : String(err)) +
+              '\n\n您可以把刚才下载下来的 CSV 文件发给管理员进行人工上榜。'
+          );
+        } catch (e2) {
+          this.showMsg('上传失败', err && err.message ? err.message : String(err));
+        }
       } finally {
         this.uploadingResult = false;
       }
@@ -940,7 +949,17 @@ export default {
         this.showMsg('上传成功', '淘汰表上传成功，感谢您的投稿！');
       } catch (err) {
         console.error(err);
-        this.showMsg('上传失败', err && err.message ? err.message : String(err));
+        try {
+          const csv = this._buildElimCSV();
+          this._downloadCSV(csv, '淘汰表（未上传-本地备份）');
+          this.showMsg(
+            '上传失败（已为您自动生成本地 CSV 备份）',
+            (err && err.message ? err.message : String(err)) +
+              '\n\n您可以把刚才下载下来的 CSV 文件发给管理员进行人工上榜。'
+          );
+        } catch (e2) {
+          this.showMsg('上传失败', err && err.message ? err.message : String(err));
+        }
       } finally {
         this.uploadingElim = false;
       }
