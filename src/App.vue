@@ -60,6 +60,8 @@ function parsePoems(text) {
   return poems;
 }
 
+const HASH_TO_MODE = { '#/nxuan64': '64' };
+
 export default {
   name: 'App',
   data() {
@@ -70,9 +72,20 @@ export default {
     };
   },
   mounted() {
+    this.mode = this.hashToMode();
+    window.addEventListener('hashchange', this.handleHashChange);
     this.refreshRandomPoem();
   },
+  beforeDestroy() {
+    window.removeEventListener('hashchange', this.handleHashChange);
+  },
   methods: {
+    hashToMode() {
+      return HASH_TO_MODE[window.location.hash] || null;
+    },
+    handleHashChange() {
+      this.mode = this.hashToMode();
+    },
     refreshRandomPoem() {
       const poems = parsePoems(poemSource);
       if (poems.length > 0) {
@@ -82,7 +95,7 @@ export default {
       }
     },
     switchMode(m) {
-      this.mode = m;
+      window.location.hash = m === '64' ? '/nxuan64' : '/';
     }
   }
 };
