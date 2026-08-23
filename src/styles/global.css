@@ -235,8 +235,6 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 }
 
 /* ==================== N选64 布局 ==================== */
-.n64-page #app-root,
-.n64-page { max-width: none; }
 .n64-page { animation: fadeIn 0.3s ease; }
 
 .n64-layout {
@@ -251,14 +249,14 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   align-self: start;
 }
 
-/* 全文按钮 & 展开行 */
+/* 全文按钮 & 展开行：按钮样式与「淘汰」按钮保持一致（纯色条块，无外框） */
 .expand-cell {
-  padding: 3px 4px !important;
-  text-align: center !important;
-  background: #faf9f6 !important;
+  padding: 0 !important;
+  background: transparent !important;
   cursor: default !important;
   border-right: 1px solid #dde7dd;
   border-bottom: 1px solid #dde7dd;
+  vertical-align: middle;
 }
 .expand-empty {
   padding: 0 !important;
@@ -267,22 +265,29 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   border-bottom: 1px solid #dde7dd;
 }
 .expand-btn {
-  display: inline-block;
-  min-width: 46px;
-  padding: 2px 6px;
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 42px;
+  padding: 4px 0;
+  font-size: 13px;
   line-height: 1.2;
   color: #2c3e2c;
-  background: #f5f8f4;
-  border: 1px solid #b8cdb8;
+  background: #c9d4cc;
+  border: none;
+  border-radius: 0;
   cursor: pointer;
   font-family: inherit;
-  letter-spacing: 1px;
-  transition: all 0.15s;
+  font-weight: 600;
+  letter-spacing: 2px;
+  transition: background 0.15s;
+  user-select: none;
+  flex-shrink: 0;
 }
 .expand-btn:hover {
-  background: #dde7dd;
-  border-color: #4a7a52;
+  background: #b8c5bc;
   color: #2c3e2c;
 }
 .expand-row td.expand-body {
@@ -338,8 +343,8 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 }
 .swipe-action {
   width: 80px;
-  background: #c94a3e;
-  color: #fff;
+  background: #e7c9c6;
+  color: #2c3e2c;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -350,7 +355,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   user-select: none;
   flex-shrink: 0;
 }
-.swipe-action:hover { background: #b03e34; }
+.swipe-action:hover { background: #d9b5b1; color: #2c3e2c; }
 .poem-cell.selected { background: #e3f1e5; }
 .poem-cell.selected:hover { background: #d4e9d7; }
 
@@ -431,27 +436,28 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
     max-width: 1280px;
     margin: 0 auto;
   }
-  .n64-col-main   { grid-column: 1; grid-row: 1; }
-  .n64-col-result { grid-column: 2; grid-row: 1; }
-  .n64-col-elim   { grid-column: 1 / span 2; grid-row: 2; width: 100%; justify-self: center; max-width: 1280px; }
+  .n64-col-main   { grid-column: 1; grid-row: 1; order: initial; }
+  .n64-col-result { grid-column: 2; grid-row: 1; order: initial; }
+  .n64-col-elim   { grid-column: 1 / span 2; grid-row: 2; order: initial; width: 100%; justify-self: center; max-width: 1280px; }
 
   .elim-table { width: 100%; }
 }
 
-/* ==================== 断点 3: >=1400px（三列）：左淘汰表（窄） | 中诗文库 | 右64结果表 ==================== */
+/* ==================== 断点 3: >=1400px（三列）：左淘汰表（窄） | 中诗文库 | 右64结果表 —— 三栏顶部严格同行，等高起始 ==================== */
 @media (min-width: 1400px) {
   #app-root { padding: 44px 110px; }
 
   .n64-layout {
     grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.25fr) minmax(0, 0.95fr);
+    grid-template-rows: auto;
     gap: 36px;
     align-items: start;
     max-width: 1560px;
     margin: 0 auto;
   }
-  .n64-col-elim   { grid-column: 1; }
-  .n64-col-main   { grid-column: 2; }
-  .n64-col-result { grid-column: 3; }
+  .n64-col-elim   { grid-column: 1; grid-row: 1; order: initial; }
+  .n64-col-main   { grid-column: 2; grid-row: 1; order: initial; }
+  .n64-col-result { grid-column: 3; grid-row: 1; order: initial; }
 
   .result-cell { height: 112px; padding: 5px 6px; }
   .result-cell .poem-title { font-size: 12px; }
