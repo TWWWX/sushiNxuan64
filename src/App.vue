@@ -44,7 +44,7 @@
           <div class="table-title-row">
             <div class="title-deco-bar"></div>
             <h2 class="table-page-title">诗文库主表</h2>
-            <span class="table-hint">单击 → 选入结果表 / 再次单击取消 &nbsp;|&nbsp; 左滑 → 淘汰</span>
+            <span class="table-hint">单击 → 选中 &nbsp;|&nbsp; 再次单击 → 取消</span>
             <span class="table-counter">{{ visiblePoems.length }} 首</span>
           </div>
           <div class="table-wrapper poem-library-wrapper">
@@ -311,12 +311,27 @@ export default {
       return Math.max(16, needed);
     },
     elimMultiCol() {
-      if (typeof window === 'undefined') return false;
-      const w = window.innerWidth;
-      return w >= 900 && w < 1400;
+      return this.elimColCount >= 2;
     },
     elimColCount() {
-      return 4;
+      if (typeof window === 'undefined') return 1;
+      const w = window.innerWidth;
+      let avail;
+      if (w < 900) avail = 0;                                 /* 手机端单列 */
+      else if (w < 1400) avail = Math.min(1120, w - 160);    /* 两列下方：跨两栏总宽 ≈ w-两边160，上限 1120 */
+      else if (w < 1800) avail = Math.max(220, (w - 220) * 0.7 / 2.9 - 16); /* 三列：淘汰表 0.7/2.9 占比 */
+      else if (w < 2100) avail = Math.max(220, (w - 220) * 0.7 / 2.9 - 16); /* 1800~2100：单列表头/内容已经不换行 */
+      else avail = Math.max(220, (w - 220) * 0.7 / 2.9 - 16);
+      if (avail <= 0) return 1;
+      const cols = Math.max(1, Math.floor((avail + 16) / 220));
+      /* 封顶策略：1400~1799 强制1列（最左窄列）；1800+ 封顶 2 列 直到 2100+ 3列；两列模式封顶4列 */
+      let cap;
+      if (w < 900) cap = 1;
+      else if (w < 1400) cap = 4;
+      else if (w < 1800) cap = 1;
+      else if (w < 2100) cap = 2;
+      else cap = 3;
+      return Math.min(cap, Math.max(1, cols));
     },
     elimGrid() {
       const cols = this.elimColCount;

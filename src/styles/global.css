@@ -254,14 +254,12 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   align-self: start;
 }
 
-/* 全文按钮 & 展开行：按钮结构与「淘汰」按钮完全一致（纯色条块占满整格，无上下白线） */
+/* 全文按钮 & 展开行：按钮以绝对定位填满整格（与淘汰按钮外框视觉一致，不出现半格空白） */
 .expand-cell {
   padding: 0 !important;
   background: transparent !important;
   cursor: default !important;
-  border-right: 1px solid #dde7dd;
-  border-bottom: 1px solid #dde7dd;
-  border-top: 1px solid #dde7dd;
+  border: 1px solid #dde7dd;
   vertical-align: top;
   position: relative;
   width: 72px;
@@ -273,14 +271,12 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   border-bottom: 1px solid #dde7dd;
 }
 .expand-btn {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: calc(100% + 2px);
-  min-height: calc(100% + 2px);
-  height: calc(100% + 2px);
-  margin: -1px 0 0 -1px;
-  padding: 8px 4px;
+  padding: 0;
   font-size: 13px;
   line-height: 1.2;
   color: #faf9f6;
@@ -293,7 +289,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   letter-spacing: 2px;
   transition: background 0.15s;
   user-select: none;
-  flex-shrink: 0;
+  box-sizing: border-box;
 }
 .expand-btn:hover {
   background: #7a8a80;
@@ -334,16 +330,13 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   border: none;
 }
 
-/* 诗文库主表：高度随视窗动态计算（默认不超过屏幕可用高度） */
-.poem-library-wrapper {
-  max-height: calc(100vh - 280px);
-  min-height: 520px;
-}
-/* 64结果表 & 淘汰表：同样限制不超过视窗高度 */
+/* 三表 wrapper：写死 height 保证等高（桌面端三列模式下高度统一 = 视窗预留） */
+.poem-library-wrapper,
 .result-wrapper,
 .elim-wrapper {
-  max-height: calc(100vh - 280px);
-  min-height: 520px;
+  height: calc(100vh - 280px);
+  min-height: 620px;
+  max-height: none;
 }
 .poem-library-table td { background: #fcfdfb; }
 .poem-library-table .poem-cell { padding: 0; overflow: hidden; }
@@ -377,17 +370,34 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 .poem-cell.selected { background: #e3f1e5; }
 .poem-cell.selected:hover { background: #d4e9d7; }
 
-/* 64结果表：4列 */
+/* 64结果表：每列最小宽度保证不换行，必要时横滚；行高减小 */
 .result-wrapper { }
-.result-table th { font-size: 12px; padding: 5px 4px; }
+.result-table {
+  width: 100%;
+  min-width: 880px;
+}
+.result-table colgroup col {
+  min-width: 220px;
+}
+.result-table th { font-size: 12px; padding: 5px 4px; white-space: nowrap; }
 .result-cell {
-  padding: 4px 5px;
+  padding: 3px 4px;
   font-size: 12px;
   vertical-align: top;
-  height: 100px;
+  height: 66px;
 }
-.result-cell .poem-title { font-size: 11px; }
-.result-cell .poem-content { font-size: 10px; }
+.result-cell .poem-title,
+.result-cell .poem-content {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
+  margin: 0;
+  line-height: 1.2;
+}
+.result-cell .poem-title { font-size: 11px; margin-bottom: 2px; }
+.result-cell .poem-content { font-size: 10px; color: #5c7a5c; }
 .result-idx {
   color: #b8cdb8;
   font-size: 10px;
@@ -396,15 +406,25 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 }
 .result-cell:not(.empty) { background: #fcfdfb; }
 
-/* 淘汰表 */
+/* 淘汰表：表单列/多列通用 */
 .elim-wrapper { }
-.elim-table th { background: #a3bca8; border-color: #8fae93; }
+.elim-table { width: 100%; }
+.elim-multi .elim-table { min-width: 0; table-layout: fixed; }
+.elim-table th { background: #a3bca8; border-color: #8fae93; white-space: nowrap; }
 .elim-cell {
   padding: 4px 6px;
   background: #fcfdfb;
   font-size: 12px;
   vertical-align: top;
   transition: all 0.15s;
+}
+.elim-cell .poem-title,
+.elim-cell .poem-content {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  line-height: 1.25;
 }
 .elim-cell:hover { background: #f5f8f4; border-color: #4a7a52; }
 .elim-cell.empty { background: #faf9f6; cursor: default; }
@@ -413,12 +433,13 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 
 /* ==================== 断点 1: <900px（手机/窄屏）：单列，顺序：诗文库 → 64结果表 → 淘汰表 ==================== */
 @media (max-width: 899px) {
-  #app-root { max-width: 100%; padding: 20px 14px; margin: 0; }
+  #app-root { max-width: 100%; padding: 36px 28px; margin: 0; }
 
   .n64-layout {
     grid-template-columns: 1fr;
     max-width: 100%;
     margin: 0 auto;
+    gap: 22px;
   }
   .n64-col-main   { order: 1; }
   .n64-col-result { order: 2; }
@@ -429,10 +450,12 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .result-wrapper,
   .elim-wrapper {
     height: auto;
-    max-height: calc(100vh - 240px);
+    max-height: calc(100vh - 320px);
     min-height: 420px;
   }
-  .result-cell { height: 88px; padding: 2px 3px; }
+  .result-table { min-width: 720px; }
+  .result-table colgroup col { min-width: 180px; }
+  .result-cell { height: 82px; padding: 2px 3px; }
   .result-cell .poem-title { font-size: 10px; }
   .result-cell .poem-content { font-size: 9px; }
 
@@ -490,7 +513,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 
 /* ==================== 700px 小屏进一步压缩 ==================== */
 @media (max-width: 700px) {
-  #app-root { padding: 16px 10px; max-width: 100%; }
+  #app-root { padding: 28px 20px; max-width: 100%; }
   .home-title-row { gap: 8px; }
   .title-line { display: none; }
   .home-title { font-size: 18px; letter-spacing: 4px; }
@@ -501,6 +524,8 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .entry-card { width: 150px; height: 70px; }
   .card-title { font-size: 13px; }
   .card-subtitle { font-size: 12px; }
+
+  .n64-layout { gap: 18px; }
 
   .table-page-header { flex-direction: column; align-items: flex-start; gap: 8px; }
   .table-title-row { flex-wrap: wrap; gap: 8px; }
@@ -513,6 +538,8 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .poem-title { font-size: 10px; margin-bottom: 0; }
   .poem-content { font-size: 9px; }
 
+  .result-table { min-width: 640px; }
+  .result-table colgroup col { min-width: 160px; }
   .result-cell { height: 78px; padding: 1px 2px; }
   .result-cell .poem-title { font-size: 9px; }
   .result-cell .poem-content { font-size: 8px; }
@@ -521,8 +548,8 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .result-wrapper,
   .elim-wrapper {
     height: auto;
-    max-height: calc(100vh - 220px);
-    min-height: 340px;
+    max-height: calc(100vh - 320px);
+    min-height: 300px;
   }
 
   .elim-cell { padding: 2px 3px; font-size: 10px; }
