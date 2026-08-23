@@ -675,7 +675,6 @@ export default {
     },
 
     // ===================== 导出PNG（直接对 苏轼诗文TOP64/淘汰表 的表格本身进行截图） =====================
-    // 苏轼诗文TOP64 日常显示 2 列，但在导出图片时会把克隆体强制重排为 4 列（16行 = 64格）
     // 苏轼诗文TOP64 在 <thead class="export-only-head"> 里插入两行（标题 / 副栏），日常隐藏，导出前临时显示。
     _escapeHtml(str) {
       if (str === null || str === undefined) return '';
@@ -723,123 +722,100 @@ export default {
       cloneWrap.style.background = '#ffffff';
       cloneWrap.style.zIndex = '1';
       const tableClone = table.cloneNode(true);
-      // -------- 【重点】TOP64 结果表：两列布局；每行合并宽度 = 原 4 列 / 2 * 2 + 10（每格比原两格合并宽+10） ----
       const isResult = (tableId === 'resultTable');
-      if (isResult) {
-        const resultCols = 2; // 改为两列
-        const data = this.result64.slice();
-        // 64 首两列共 32 行；不足时补到整行
+      const isElim = (tableId === 'elimTable');
+      const FF = '"Noto Serif SC","Songti SC","SimSun","STSong",serif';
+
+      if (isResult || isElim) {
+        // --- 两种表统一两列；动态区分数据源/标题/列数/空格类名 ---
+        const resultCols = 2;
+        const data = (isResult ? this.result64 : this.eliminated).slice();
         const numRows = Math.max(1, Math.ceil(data.length / resultCols));
+        const actualCount = data.length;
 
-        // 字号 / 尺寸参数：基于原 4 列值分别调整
-        const cellH = 20 + 4;              // 行高 +4：原 20px → 24px
-        const titleFS = 10 + 1;            // 标题 +1 → 11px
-        const contentFS = 9 + 1;           // 内容 +1 → 10px
-        const idxFS = 7 + 1;               // 序号 +1 → 8px
-        // 总宽：原 4 列 880px；改两列后每列=440px。每行再整体宽 +10px → 890px
-        const totalW = 880 + 10;
+        // 尺寸：行高+4 24px，字号各+1，整体宽 890（原880+10）
+        const cellH = 24;
+        const titleFS = 11;
+        const contentFS = 10;
+        const idxFS = 8;
+        const totalW = 890;
 
-        // 2a. colgroup = 2 列
-        const cg = tableClone.querySelector('colgroup');
-        if (cg) cg.innerHTML = '<col><col>';
+        // 表头标题：TOP64 的 "64" 改为实际填的诗词数；淘汰表固定"淘汰表"
+        const titleText = isResult
+          ? ('最喜欢的苏轼诗文TOP' + actualCount)
+          : ('淘汰表（共' + actualCount + '首）');
 
-        const FF = '"Noto Serif SC","Songti SC","SimSun","STSong",serif';
-        // 2b. export-only-head：colspan = 2（两列）；标题行样式；第二行「填表人」居中
-        const eHead = tableClone.querySelector('thead.export-only-head');
-        if (eHead) {
-          eHead.querySelectorAll('th').forEach(th => { th.setAttribute('colspan', '2'); th.style.fontFamily = FF; });
-          const titleTh = eHead.querySelector('.export-title-cell');
-          if (titleTh) {
-            titleTh.style.padding = '18px 12px 8px';
-            titleTh.style.fontSize = '26px';
-            titleTh.style.letterSpacing = '4px';
-            titleTh.style.fontFamily = FF;
-            titleTh.style.background = '#faf9f6';
-            titleTh.style.borderBottom = '1px solid #b8cdb8';
-            titleTh.style.textAlign = 'center';
-          }
-          const subTh = eHead.querySelector('.export-sub-cell');
-          if (subTh) {
-            subTh.style.padding = '0';
-            subTh.style.background = '#faf9f6';
-            subTh.style.borderBottom = '1px solid #b8cdb8';
-            subTh.style.fontFamily = FF;
-            subTh.style.textAlign = 'center';
-            const subFlex = subTh.querySelector('.sub-flex');
-            if (subFlex) {
-              subFlex.style.padding = '8px 12px';
-              subFlex.style.display = 'flex';
-              subFlex.style.justifyContent = 'center';
-              subFlex.style.alignItems = 'center';
-              subFlex.style.gap = '12px';
-              subFlex.style.fontSize = '14px';
-              subFlex.style.fontFamily = FF;
-              subFlex.style.color = '#6b866b';
-              subFlex.style.textAlign = 'center';
+        const safeTitle = this._escapeHtml(titleText);
+        const safeFiller = this._escapeHtml('填表人：' + this._getSafeFillerName());
+
+        // 重建整表结构（覆盖克隆体），统一两列
+        const colgroupHtml = '<colgroup><col /><col /></colgroup>';
+        const theadHtml =
+          `<thead class="export-only-head" style="display:table-header-group;">
+            <tr style="height:auto;">
+              <th colspan="2" style="padding:18px 12px 8px;font-size:26px;letter-spacing:4px;font-family:${FF};background:#faf9f6;border-bottom:1px solid #b8cdb8;text-align:center;color:#2c3e2c;font-weight:700;">${safeTitle}</th>
+            </tr>
+            <tr style="height:auto;">
+              <th colspan="2" style="padding:8px 12px;background:#faf9f6;border-bottom:1px solid #b8cdb8;text-align:center;font-size:12px;color:#6b866b;font-family:${FF};font-weight:normal;">${safeFiller}</th>
+            </tr>
+          </thead>`;
+
+        const rowBuilder = [];
+        const cellCls = isResult ? 'result-cell' : 'elim-cell';
+        for (let r = 0; r < numRows; r++) {
+          let rowHtml = '<tr style="height:' + cellH + 'px;">';
+          for (let c = 0; c < resultCols; c++) {
+            const i = r * resultCols + c;
+            if (i < data.length) {
+              const p = data[i];
+              rowHtml += `<td class="${cellCls}" data-id="${this._escapeHtml(p.id)}"
+                style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:2px 6px;vertical-align:middle;line-height:1.25;font-family:${FF};border:1px solid #dde7dd;background:#fcfdfb;">
+                <span class="poem-title" style="font-size:${titleFS}px;line-height:1.3;font-family:${FF};display:block;">${this._escapeHtml(p.title)}</span>
+                <span class="poem-content" style="font-size:${contentFS}px;line-height:1.3;font-family:${FF};display:block;color:${isResult ? '#5c7a5c' : '#4e5b4e'};">${this._escapeHtml(p.content || '')}</span>
+              </td>`;
+            } else {
+              rowHtml += `<td class="${cellCls} empty"
+                style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:2px 6px;vertical-align:middle;font-family:${FF};border:1px solid #dde7dd;background:#faf9f6;color:#b8cdb8;">
+                <span class="result-idx" style="font-size:${idxFS}px;font-family:${FF};">${i + 1}</span>
+              </td>`;
             }
-            const midSpan = subTh.querySelector('.es-mid');
-            if (midSpan) { midSpan.style.fontSize = '12px'; midSpan.style.fontFamily = FF; midSpan.style.textAlign = 'center'; }
-            ['es-left','es-right'].forEach(cls => {
-              const s = subTh.querySelector('.' + cls);
-              if (s) s.style.fontFamily = FF;
-            });
           }
+          rowHtml += '</tr>';
+          rowBuilder.push(rowHtml);
         }
+
+        // 表尾
+        const leftStr = '网站制作：蟋蟀  诗文筛汇：嫻菜无敌 蟋蟀';
+        const rightStr = '聚友：欢迎关注公众号「东坡墙」QQ「3301590656」';
+        const centerStr = 'www.sudongpo521.cn';
+        const footerRow =
+          `<tr style="height:auto;">
+            <td colspan="2" style="padding:10px 12px 8px;border-top:1px solid #b8cdb8;font-family:${FF};background:#faf9f6;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:${FF};font-size:11px;line-height:1.7;color:#4e5b4e;">
+                <span style="text-align:left;flex:0 0 auto;">${this._escapeHtml(leftStr)}</span>
+                <span style="text-align:center;flex:1 1 auto;font-size:11px;">${this._escapeHtml(centerStr)}</span>
+                <span style="text-align:right;flex:0 0 auto;">${this._escapeHtml(rightStr)}</span>
+              </div>
+            </td>
+          </tr>`;
+        rowBuilder.push(footerRow);
+
+        const tbodyHtml = '<tbody>' + rowBuilder.join('') + '</tbody>';
+
+        // 整体覆盖克隆体：避免日常的列数/隐藏表头差异干扰
+        tableClone.innerHTML = colgroupHtml + theadHtml + tbodyHtml;
+        tableClone.setAttribute('border', '0');
+        tableClone.setAttribute('cellspacing', '0');
+        tableClone.setAttribute('cellpadding', '0');
         tableClone.style.fontFamily = FF;
         tableClone.style.color = '#2c3e2c';
-
-        // 2c. 重建 tbody：两列 × numRows
-        const tbody = tableClone.querySelector('tbody');
-        if (tbody) {
-          const rows = [];
-          for (let r = 0; r < numRows; r++) {
-            let rowHtml = '<tr style="height:' + cellH + 'px;">';
-            for (let c = 0; c < resultCols; c++) {
-              const i = r * resultCols + c;
-              if (i < data.length) {
-                const p = data[i];
-                rowHtml += `<td class="result-cell" data-id="${this._escapeHtml(p.id)}"
-                  style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:2px 6px;vertical-align:middle;line-height:1.25;font-family:${FF};">
-                  <span class="poem-title" style="font-size:${titleFS}px;line-height:1.3;font-family:${FF};">${this._escapeHtml(p.title)}</span>
-                  <span class="poem-content" style="font-size:${contentFS}px;line-height:1.3;font-family:${FF};">${this._escapeHtml(p.content || '')}</span>
-                </td>`;
-              } else {
-                rowHtml += `<td class="result-cell empty"
-                  style="height:${cellH}px;min-height:${cellH}px;max-height:${cellH}px;padding:2px 6px;vertical-align:middle;font-family:${FF};">
-                  <span class="result-idx" style="font-size:${idxFS}px;font-family:${FF};">${i + 1}</span>
-                </td>`;
-              }
-            }
-            rowHtml += '</tr>';
-            rows.push(rowHtml);
-          }
-
-          // 末尾一行：居左（制作/筛汇）| 居右（聚友：公众号+QQ）| 居中（域名）；字体稍小
-          const leftStr = '网站制作：蟋蟀  诗文筛汇：嫻菜无敌 蟋蟀';
-          const rightStr = '欢迎关注公众号「东坡墙」QQ「3301590656」';
-          const centerStr = 'www.sudongpo521.cn';
-          const footerRow =
-            `<tr style="height:auto;">
-              <td colspan="2" style="padding:10px 12px 8px;border-top:1px solid #b8cdb8;font-family:${FF};background:#faf9f6;">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:${FF};font-size:11px;line-height:1.7;color:#4e5b4e;">
-                  <span style="text-align:left;flex:0 0 auto;">${this._escapeHtml(leftStr)}</span>
-                  <span style="text-align:center;flex:1 1 auto;font-size:11px;">${this._escapeHtml(centerStr)}</span>
-                  <span style="text-align:right;flex:0 0 auto;">${this._escapeHtml(rightStr)}</span>
-                </div>
-              </td>
-            </tr>`;
-          rows.push(footerRow);
-
-          tbody.innerHTML = rows.join('');
-          tbody.style.fontFamily = FF;
-        }
-
         tableClone.style.tableLayout = 'fixed';
         tableClone.style.width = totalW + 'px';
         tableClone.style.maxWidth = totalW + 'px';
         tableClone.style.height = 'auto';
+        tableClone.style.background = '#ffffff';
       } else {
-        // 淘汰表直接继承原尺寸
+        // 兜底（理论不会进入）
         const realWidth = Math.ceil(table.getBoundingClientRect().width);
         tableClone.style.tableLayout = 'fixed';
         tableClone.style.width = realWidth + 'px';
