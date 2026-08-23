@@ -575,18 +575,18 @@ export default {
     _getDeviceId() {
       return this._ensureDeviceId();
     },
-    // 上传使用 deviceId 作为 R2 folder 的子路径，同设备重复上传直接覆盖（PUT 同名 key = 覆盖）
-    // 文件名保持固定且简洁，不含动态随机串 / 日期，确保同一设备只保留一份
+    // 上传：deviceId 直接作为文件名前缀，folder 使用白名单顶层目录（不建子目录）
+    // 文件名形式：{deviceId}_{表标识}.csv；不含动态串，同设备重复 PUT 即覆盖
     _buildUploadFileName(kind) {
-      if (kind === 'result') return '苏轼诗文TOP64.csv';
-      if (kind === 'elim') return '淘汰表.csv';
-      return 'data.csv';
-    },
-    // 上传文件夹：在原 folder 下再追加 deviceId 子目录，同设备同表仅一份，新上传覆盖旧文件
-    _buildUploadFolder(kind, folder) {
       const did = this._getDeviceId();
       const safe = did.replace(/[\\/:*?"<>|\s]/g, '_');
-      return (folder ? folder + '/' : '') + safe;
+      if (kind === 'result') return safe + '_苏轼诗文TOP64.csv';
+      if (kind === 'elim') return safe + '_淘汰表.csv';
+      return safe + '.csv';
+    },
+    _buildUploadFolder(kind, folder) {
+      // 直接使用白名单顶层 folder，不再拼接 deviceId 子目录
+      return folder || '';
     },
     _csvEscape(s) {
       if (s === null || s === undefined) return '""';
