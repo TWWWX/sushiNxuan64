@@ -1,5 +1,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+html, body { overflow-x: hidden; max-width: 100%; }
 body {
   font-family: "Noto Serif SC", "Songti SC", "SimSun", "STSong", serif;
   background: #f5f3ef;
@@ -11,6 +12,9 @@ body {
   max-width: 1800px;
   margin: 0 auto;
   padding: 40px 40px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* ==================== 主页 ==================== */
@@ -183,6 +187,10 @@ body {
   background: #fff;
   border: 1px dashed #b8cdb8;
   padding: 2px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 table {
   border-collapse: separate;
@@ -248,10 +256,17 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   gap: 26px;
   padding: 0;
   align-items: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .n64-col {
   width: 100%;
   align-self: start;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* 全文按钮 & 展开行：按钮以绝对定位填满整格（与淘汰按钮外框视觉一致，不出现半格空白） */
