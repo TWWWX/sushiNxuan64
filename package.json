@@ -1,0 +1,19 @@
+{
+  "name": "sushiNxuan64",
+  "version": "1.0.0",
+  "private": true,
+  "description": "苏轼诗文N选64",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173"
+  },
+  "dependencies": {
+    "vue": "^2.7.16"
+  },
+  "devDependencies": {
+    "vite": "^3.2.10",
+    "vite-plugin-vue2": "^2.0.3",
+    "vue-template-compiler": "^2.7.16"
+  }
+}
