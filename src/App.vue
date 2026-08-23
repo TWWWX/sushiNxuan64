@@ -1002,18 +1002,7 @@ export default {
         this.showMsg('上传成功', '上传成功，感谢您的投稿！');
       } catch (err) {
         console.error(err);
-        // 兜底：云端上传失败时，提供"本地下载 CSV"作为替代方案
-        try {
-          const csv = this._buildResultCSV();
-          this._downloadCSV(csv, '苏轼诗文TOP64（未上传-本地备份）');
-          this.showMsg(
-            '上传失败（已为您自动生成本地 CSV 备份）',
-            (err && err.message ? err.message : String(err)) +
-              '\n\n您可以把刚才下载下来的 CSV 文件发给管理员进行人工上榜。'
-          );
-        } catch (e2) {
-          this.showMsg('上传失败', err && err.message ? err.message : String(err));
-        }
+        this.showMsg('上传失败', err && err.message ? err.message : String(err));
       } finally {
         this.uploadingResult = false;
       }
@@ -1030,17 +1019,7 @@ export default {
         this.showMsg('上传成功', '上传成功，感谢您的投稿！');
       } catch (err) {
         console.error(err);
-        try {
-          const csv = this._buildElimCSV();
-          this._downloadCSV(csv, '淘汰表（未上传-本地备份）');
-          this.showMsg(
-            '上传失败（已为您自动生成本地 CSV 备份）',
-            (err && err.message ? err.message : String(err)) +
-              '\n\n您可以把刚才下载下来的 CSV 文件发给管理员进行人工上榜。'
-          );
-        } catch (e2) {
-          this.showMsg('上传失败', err && err.message ? err.message : String(err));
-        }
+        this.showMsg('上传失败', err && err.message ? err.message : String(err));
       } finally {
         this.uploadingElim = false;
       }

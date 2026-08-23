@@ -42,8 +42,9 @@ export async function onRequest(context) {
     );
   }
 
-  // 文件夹白名单
-  if (!["shiwen-nxuan64", "shiwen-eliminated"].includes(folder)) {
+  // 文件夹白名单：允许顶层白名单，或白名单后紧跟一级 "/设备Id" 子目录（用于同设备重复 PUT = 覆盖旧文件）
+  const folderRe = /^(shiwen-nxuan64|shiwen-eliminated)(\/[A-Za-z0-9_.-]+)?$/;
+  if (!folderRe.test(folder)) {
     return corsResponse(
       JSON.stringify({ error: "不允许的文件夹名称" }),
       403,
@@ -51,7 +52,8 @@ export async function onRequest(context) {
     );
   }
 
-  const uniqueKey = `${folder}/${Date.now()}-${fileName}`;
+  // 同设备同文件名直接覆盖：不再加 Date.now() 前缀，使 Key 在同设备同表保持稳定
+  const uniqueKey = `${folder}/${fileName}`;
 
   const R2 = new S3Client({
     region: "auto",
