@@ -952,7 +952,7 @@ export default {
         return;
       }
       if (this.result64.length !== 64) {
-        this.showToast('TOP64 需为正好 64 首后再上传', 'warn', 3000);
+        this.showToast('TOP64 需为 64 首', 'warn', 3000);
         return;
       }
       if (!this._requireAuthOrProceed('result')) return;
