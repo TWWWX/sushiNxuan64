@@ -714,7 +714,7 @@ export default {
     async _exportPNGDirect({ wrapperId, tableId, mode }) {
       const wrapper = document.getElementById(wrapperId);
       const table = document.getElementById(tableId);
-      if (!wrapper || !table) { this.showMsg('提示', '未找到表格容器'); return; }
+      if (!wrapper || !table) { this.showToast('未找到表格容器', 'error'); return; }
 
       // ---- 1. 展开 wrapper：去掉最大高度限制，显示隐藏的导出表头行 ----
       const prevOverflow = wrapper.style.overflow;
@@ -897,7 +897,7 @@ export default {
         }, 500);
       } catch (err) {
         console.error(err);
-        this.showMsg('导出图片失败', err && err.message ? err.message : String(err));
+        this.showToast('导出图片失败：' + (err && err.message ? err.message : String(err)), 'error', 3000);
       } finally {
         if (cloneWrap && cloneWrap.parentNode) cloneWrap.parentNode.removeChild(cloneWrap);
         // ---- 3. 还原：隐藏导出表头 + 恢复 wrapper 原属性 + 还原 th sticky ----
@@ -955,7 +955,7 @@ export default {
         return;
       }
       if (this.result64.length !== 64) {
-        this.showMsg('为排行榜公平性考虑', '只接受诗文数量为64首的数据，请将 苏轼诗文TOP64 调整为正好 64 首后再上传。');
+        this.showToast('TOP64 需为正好 64 首后再上传', 'warn', 3000);
         return;
       }
       if (!this._requireAuthOrProceed('result')) return;
@@ -967,7 +967,7 @@ export default {
         return;
       }
       if (this.eliminated.length === 0) {
-        this.showMsg('淘汰表为空', '淘汰表中没有任何诗文，无法上传。');
+        this.showToast('淘汰表为空，无法上传', 'warn');
         return;
       }
       if (!this._requireAuthOrProceed('elim')) return;
