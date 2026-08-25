@@ -247,9 +247,6 @@
     <!-- 轻反馈 Toast：成功/失败/警告等无需用户确认的提示 -->
     <transition name="toast-fade">
       <div v-if="toast.show" class="toast-wrap" :class="'toast-' + toast.type">
-        <span class="toast-icon" v-if="toast.type === 'success'">✓</span>
-        <span class="toast-icon" v-else-if="toast.type === 'error'">✕</span>
-        <span class="toast-icon" v-else-if="toast.type === 'warn'">!</span>
         <span class="toast-text">{{ toast.text }}</span>
       </div>
     </transition>

@@ -124,9 +124,8 @@
 ### 3.1 结构
 
 ```
-.toast-wrap  容器（fixed 屏幕中央，矩形无圆角）
- ├─ .toast-icon  状态图标（✓ / ✕ / !，方边框无圆角）
- └─ .toast-text  提示文本
+.toast-wrap  容器（fixed 屏幕中央，矩形无圆角，纯文字）
+ └─ .toast-text  提示文本（整行居中）
 ```
 
 Vue `<transition name="toast-fade">` 包裹，提供淡入淡出 + 轻微位移。
@@ -138,16 +137,16 @@ Vue `<transition name="toast-fade">` 包裹，提供淡入淡出 + 轻微位移�
 | position | fixed，top 50% / left 50%，translate 居中 |
 | z-index | 10000 |
 | 最小宽度 | 160px，最大宽度 80vw |
-| 内边距 | 12px 20px |
+| 内边距 | 12px 24px |
 | 圆角 | 无（0） |
 | 字号 | 14px，行高 1.5，字距 1px，居中对齐 |
 | 文字颜色 | `#fff` |
-| 布局 | flex 水平排列，gap 10px |
+| 布局 | 纯文字居中（无图标、无 flex gap） |
 | 阴影 | 0 8px 24px `rgba(44,62,44,0.25)` |
 | user-select | none |
-| 小屏（≤700px） | 字号 13px，内边距 10px 16px，min-width 140px |
+| 小屏（≤700px） | 字号 13px，内边距 10px 20px，min-width 140px |
 
-### 3.3 四种状态配色（无圆角）
+### 3.3 四种状态配色（无圆角，纯文字）
 
 | 类型 | class | 背景色 | 边框色 | 场景 |
 |---|---|---|---|---|
@@ -156,17 +155,7 @@ Vue `<transition name="toast-fade">` 包裹，提供淡入淡出 + 轻微位移�
 | 错误（灰红） | `.toast-error` | `rgba(139, 115, 115, 0.95)` | `#a88f8f` | 上传失败、导出图片失败、未找到容器 |
 | 警告（灰绿） | `.toast-warn` | `rgba(102, 128, 106, 0.95)` | `#b8cdb8` | 未填写填表人、TOP64≠64、淘汰表为空 |
 
-### 3.4 图标 `.toast-icon`
-
-| 属性 | 值 |
-|---|---|
-| 大小 | 20×20px（小屏 18×18px） |
-| 形状 | 方形无圆角，1.5px 白色边框 |
-| 内部字符 | ✓（success）/ ✕（error）/ !（warn） |
-| 字号 | 13px（小屏 12px），字重 700 |
-| 布局 | inline-flex 居中 |
-
-### 3.5 动效 `toast-fade`
+### 3.4 动效 `toast-fade`
 
 | 阶段 | 透明度 | 位移 |
 |---|---|---|
