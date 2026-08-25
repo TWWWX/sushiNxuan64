@@ -243,6 +243,16 @@
         </div>
       </div>
     </div>
+
+    <!-- 轻反馈 Toast：成功/失败/警告等无需用户确认的提示 -->
+    <transition name="toast-fade">
+      <div v-if="toast.show" class="toast-wrap" :class="'toast-' + toast.type">
+        <span class="toast-icon" v-if="toast.type === 'success'">✓</span>
+        <span class="toast-icon" v-else-if="toast.type === 'error'">✕</span>
+        <span class="toast-icon" v-else-if="toast.type === 'warn'">!</span>
+        <span class="toast-text">{{ toast.text }}</span>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -347,6 +357,8 @@ export default {
       showMsgModal: false,
       msgTitle: '',
       msgDesc: '',
+      toast: { show: false, type: 'success', text: '' },
+      _toastTimer: null,
     };
   },
   computed: {
@@ -509,6 +521,15 @@ export default {
       this.showMsgModal = false;
       this.msgTitle = '';
       this.msgDesc = '';
+    },
+    // ===================== 轻反馈 Toast =====================
+    showToast(text, type = 'success', duration = 2000) {
+      if (this._toastTimer) clearTimeout(this._toastTimer);
+      this.toast = { show: true, type, text };
+      this._toastTimer = setTimeout(() => {
+        this.toast.show = false;
+        this._toastTimer = null;
+      }, duration);
     },
 
     // ===================== 工具 =====================
@@ -930,7 +951,7 @@ export default {
     },
     onUploadResult() {
       if (!(this.fillerName || '').trim()) {
-        this.showMsg('需填写填表人', '请先在页面顶部填写填表人后再进行上传。');
+        this.showToast('请填写填表人', 'warn');
         return;
       }
       if (this.result64.length !== 64) {
@@ -942,7 +963,7 @@ export default {
     },
     onUploadElim() {
       if (!(this.fillerName || '').trim()) {
-        this.showMsg('需填写填表人', '请先在页面顶部填写填表人后再进行上传。');
+        this.showToast('请填写填表人', 'warn');
         return;
       }
       if (this.eliminated.length === 0) {
@@ -1007,10 +1028,10 @@ export default {
         const name = this._buildUploadFileName('result');
         const folder = this._buildUploadFolder('result', 'shiwen-nxuan64');
         await this._uploadBlob(blob, name, folder);
-        this.showMsg('上传成功', '上传成功，感谢您的投稿！');
+        this.showToast('上传成功，感谢您的投稿！', 'success');
       } catch (err) {
         console.error(err);
-        this.showMsg('上传失败', err && err.message ? err.message : String(err));
+        this.showToast('上传失败：' + (err && err.message ? err.message : String(err)), 'error', 3000);
       } finally {
         this.uploadingResult = false;
       }
@@ -1024,10 +1045,10 @@ export default {
         const name = this._buildUploadFileName('elim');
         const folder = this._buildUploadFolder('elim', 'shiwen-eliminated');
         await this._uploadBlob(blob, name, folder);
-        this.showMsg('上传成功', '上传成功，感谢您的投稿！');
+        this.showToast('上传成功，感谢您的投稿！', 'success');
       } catch (err) {
         console.error(err);
-        this.showMsg('上传失败', err && err.message ? err.message : String(err));
+        this.showToast('上传失败：' + (err && err.message ? err.message : String(err)), 'error', 3000);
       } finally {
         this.uploadingElim = false;
       }
