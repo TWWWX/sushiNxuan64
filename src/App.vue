@@ -94,6 +94,7 @@
                       <div class="expand-body-inner">
                         <strong class="expand-title">{{ p.title }}</strong>
                         <pre class="expand-content">{{ p.fullText || (p.title + '\n' + p.content) }}</pre>
+                        <pre v-if="p.note" class="expand-note">编者备注：{{ p.note }}</pre>
                       </div>
                     </td>
                   </tr>
@@ -301,7 +302,7 @@
 <script>
 import html2canvas from 'html2canvas';
 import poemSource from '../苏轼诗文精选.txt?raw';
-import csvSource from '../苏轼诗文精选.csv?raw';
+import n64Source from '../n选64总表.csv?raw';
 import rankSource from '../排行榜总表.csv?raw';
 
 function parsePoemsFromTxt(text) {
@@ -353,26 +354,21 @@ function parseCSV(text) {
   return rows;
 }
 
-function parsePoemsFromCSV(text) {
+function parsePoemsFromN64(text) {
   const rows = parseCSV(text);
   if (rows.length === 0) return [];
-  const startIdx = (rows[0][0] || '').includes('诗文及内容') ? 1 : 0;
+  const startIdx = (rows[0][0] || '').includes('模块') ? 1 : 0;
   const list = [];
   for (let i = startIdx; i < rows.length; i++) {
-    const cell0 = rows[i][0] || '';
-    const cell1 = rows[i][1] || '';
-    if (!cell0.trim() && !cell1.trim()) continue;
+    const r = rows[i] || [];
+    const cell0 = (r[0] || '').trim();
+    const title = (r[1] || '').trim() || (cell0 ? cell0.split('\n')[0].trim() : '');
+    if (!title) continue;
     const nl = cell0.indexOf('\n');
-    let title, content;
-    if (nl >= 0) {
-      title = cell0.slice(0, nl).trim();
-      content = cell0.slice(nl + 1).trim();
-    } else {
-      title = cell0.trim();
-      content = '';
-    }
-    const fullText = cell1.trim() ? cell1.trim() : (title + '\n' + content).trim();
-    list.push({ title, content, fullText });
+    const content = nl >= 0 ? cell0.slice(nl + 1).trim() : (r[2] || '').trim();
+    const fullText = (r[3] || '').trim() || (title + '\n' + content).trim();
+    const note = (r[4] || '').trim();
+    list.push({ title, content, fullText, note });
   }
   return list;
 }
@@ -486,13 +482,14 @@ export default {
   },
   methods: {
     initPoems() {
-      let list = parsePoemsFromCSV(csvSource);
+      let list = parsePoemsFromN64(n64Source);
       if (list.length === 0) list = parsePoemsFromTxt(poemSource);
       this.allPoems = list.map((p, i) => ({
         id: 'p' + i,
         title: p.title,
         content: p.content,
         fullText: p.fullText,
+        note: p.note || '',
       }));
     },
     initRank() {

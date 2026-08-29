@@ -498,6 +498,19 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   padding: 0;
   border: none;
 }
+.expand-note {
+  margin: 8px 0 0;
+  font-family: inherit;
+  font-size: 11px;
+  color: #7a877a;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+  background: transparent;
+  padding: 0;
+  border: none;
+}
 
 /* 三表 wrapper：写死 height。诗文库主表没有 3 功能键栏，因此额外加 72px（≈action-btn-row 8+12 + 按钮组 16+27）使其与另两列（含按钮）的总高度一致。 */
 .result-wrapper,
@@ -687,6 +700,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .inline-expand-btn,
   .inline-elim-btn { flex: 0 0 42px; width: 42px; font-size: 10px; letter-spacing: 0; }
   .expand-content { font-size: 10px; line-height: 1.7; }
+  .expand-note { font-size: 10px; line-height: 1.6; }
 }
 
 /* ==================== 断点 2: 900px ~ 1399px（两列）：左诗文库 / 右64结果表；淘汰表 4列居中下方 ==================== */
