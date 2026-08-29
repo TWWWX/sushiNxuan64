@@ -24,6 +24,13 @@
             <div class="card-subtitle">N选64</div>
           </div>
         </div>
+        <div class="entry-card" @click="switchMode('rank')">
+          <div class="card-deco-bar"></div>
+          <div class="card-body">
+            <div class="card-title">排行榜</div>
+            <div class="card-subtitle">截至26.8.29</div>
+          </div>
+        </div>
       </div>
 
       <div class="random-poem">
@@ -33,7 +40,7 @@
     </div>
 
     <!-- 苏轼诗文N选64 界面 -->
-    <div v-else class="table-page n64-page" id="n64Page">
+    <div v-else-if="mode === '64'" class="table-page n64-page" id="n64Page">
       <div class="table-page-header">
         <a class="back-link" @click="switchMode(null)">← 返回主页</a>
         <div class="filler-field">
@@ -206,6 +213,42 @@
       </div>
     </div>
 
+    <!-- 排行榜页面 -->
+    <div v-else-if="mode === 'rank'" class="table-page rank-page">
+      <div class="table-page-header">
+        <a class="back-link" @click="switchMode(null)">← 返回主页</a>
+      </div>
+
+      <div class="rank-center-wrap">
+        <div class="rank-wrapper" id="rankWrapper">
+          <div class="table-title-row">
+            <div class="title-deco-bar"></div>
+            <h2 class="table-page-title">苏轼诗文人气排行榜</h2>
+            <span class="table-hint">截至 2026.08.29</span>
+            <span class="table-counter">{{ rankList.length }} 首</span>
+          </div>
+          <div class="rank-table-scroll">
+            <table class="rank-table">
+              <thead>
+                <tr class="rank-head-row">
+                  <th class="rank-col-idx">序号</th>
+                  <th class="rank-col-content">诗文</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in rankList" :key="'rk' + item.idx" class="rank-row">
+                  <td class="rank-col-idx rank-idx-cell">{{ item.idx }}</td>
+                  <td class="rank-col-content rank-content-cell">
+                    <div class="rank-poem-text">{{ item.content }}</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 真人自证弹窗：首次点击任何上传按钮时弹出；内容写入CSV首行 -->
     <div v-if="showAuthModal" class="auth-mask" @click.self="cancelAuthModal">
       <div class="auth-box">
@@ -257,6 +300,7 @@
 import html2canvas from 'html2canvas';
 import poemSource from '../苏轼诗文精选.txt?raw';
 import csvSource from '../苏轼诗文精选.csv?raw';
+import rankSource from '../排行榜总表.csv?raw';
 
 function parsePoemsFromTxt(text) {
   const lines = (text || '').split(/\r?\n/);
@@ -331,7 +375,7 @@ function parsePoemsFromCSV(text) {
   return list;
 }
 
-const HASH_TO_MODE = { '#/nxuan64': '64' };
+const HASH_TO_MODE = { '#/nxuan64': '64', '#/ranking': 'rank' };
 
 export default {
   name: 'App',
@@ -356,6 +400,7 @@ export default {
       msgDesc: '',
       toast: { show: false, type: 'success', text: '' },
       _toastTimer: null,
+      rankList: [],
     };
   },
   computed: {
@@ -424,6 +469,7 @@ export default {
   },
   mounted() {
     this.initPoems();
+    this.initRank();
     this.mode = this.hashToMode();
     window.addEventListener('hashchange', this.handleHashChange);
     window.addEventListener('resize', this.forceRerender);
@@ -447,6 +493,19 @@ export default {
         fullText: p.fullText,
       }));
     },
+    initRank() {
+      const rows = parseCSV(rankSource);
+      if (rows.length === 0) return;
+      const start = (rows[0] && rows[0][0] === '计数') ? 1 : 0;
+      const list = [];
+      for (let i = start; i < rows.length; i++) {
+        const r = rows[i] || [];
+        const content = (r[1] || '').trim();
+        if (!content) continue;
+        list.push({ idx: list.length + 1, content });
+      }
+      this.rankList = list;
+    },
     forceRerender() { this.$forceUpdate(); },
     hashToMode() {
       const h = window.location.hash;
@@ -464,7 +523,9 @@ export default {
       }
     },
     switchMode(m) {
-      window.location.hash = m === '64' ? '/nxuan64' : '/';
+      if (m === '64') window.location.hash = '/nxuan64';
+      else if (m === 'rank') window.location.hash = '/ranking';
+      else window.location.hash = '/';
     },
 
     isSelected(id) { return this.selectedIdsOrder.indexOf(id) !== -1; },
