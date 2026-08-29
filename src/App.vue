@@ -224,7 +224,7 @@
         <div class="rank-wrapper" id="rankWrapper">
           <div class="table-title-row">
             <div class="title-deco-bar"></div>
-            <h2 class="table-page-title">苏轼诗文人气排行榜</h2>
+            <h2 class="table-page-title">苏轼诗文封神榜</h2>
             <span class="table-hint">截至 2026.08.29</span>
             <span class="table-counter">{{ rankList.length }} 首</span>
           </div>
