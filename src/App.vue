@@ -238,13 +238,28 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in rankList" :key="'rk' + item.idx" class="rank-row">
-                  <td class="rank-col-idx rank-idx-cell">{{ item.rank }}</td>
-                  <td class="rank-col-content rank-content-cell">
-                    <div class="rank-poem-text">{{ item.content }}</div>
-                  </td>
-                  <td class="rank-col-votes rank-votes-cell">{{ item.votes }}</td>
-                </tr>
+                <template v-for="item in rankList" :key="'rk' + item.idx">
+                  <tr class="rank-row">
+                    <td class="rank-col-idx rank-idx-cell" @click="closeRankExpand">{{ item.rank }}</td>
+                    <td
+                      class="rank-col-content rank-content-cell"
+                      :class="{ open: expandedRankIdx === item.idx }"
+                      @click.stop="toggleRankExpand(item)"
+                    >
+                      <div class="rank-poem-text">{{ item.content }}</div>
+                    </td>
+                    <td class="rank-col-votes rank-votes-cell" @click="closeRankExpand">{{ item.votes }}</td>
+                  </tr>
+                  <tr v-if="expandedRankIdx === item.idx" :key="'rkex' + item.idx" class="rank-expand-row">
+                    <td colspan="3" class="rank-expand-body">
+                      <div class="expand-body-inner">
+                        <strong class="expand-title">{{ item.title }}</strong>
+                        <pre class="expand-content">{{ item.fullText || item.content }}</pre>
+                        <pre v-if="item.note" class="expand-note">编者备注：{{ item.note }}</pre>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
@@ -386,6 +401,7 @@ export default {
       eliminatedIds: [],
       selectedIdsOrder: [],
       expandedId: null,
+      expandedRankIdx: null,
       fillerName: '',
       uploadingResult: false,
       uploadingElim: false,
@@ -496,13 +512,34 @@ export default {
       const rows = parseCSV(rankSource);
       if (rows.length === 0) return;
       const start = (rows[0] && rows[0][0] === '计数') ? 1 : 0;
+      // 通过标题与 n选64总表 匹配，取全文与编者备注（归一化间隔号/空白/书名号；截断标题用前缀匹配）
+      const norm = s => (s || '').replace(/[·・‧•\s《》]/g, '');
+      const n64 = this.allPoems.map(p => ({ norm: norm(p.title), p }));
+      const match = (title) => {
+        const key = norm(title);
+        if (!key) return null;
+        let cands = n64.filter(x => x.norm === key);
+        if (cands.length === 0) {
+          const cut = key.split('……')[0];
+          if (cut) cands = n64.filter(x => x.norm.indexOf(cut) === 0);
+        }
+        return cands.length === 1 ? cands[0].p : null;
+      };
       const list = [];
       for (let i = start; i < rows.length; i++) {
         const r = rows[i] || [];
         const votes = parseInt(r[0], 10) || 0;
         const content = (r[1] || '').trim();
         if (!content) continue;
-        list.push({ idx: list.length, votes, content });
+        const m = match(content.split('\n')[0]);
+        list.push({
+          idx: list.length,
+          votes,
+          content,
+          title: m ? m.title : content.split('\n')[0].trim(),
+          fullText: m ? m.fullText : '',
+          note: m ? m.note : '',
+        });
       }
       list.sort((a, b) => b.votes - a.votes);
       // 得票数相同的排名相同：排名 = 票数严格更多的条目数 + 1
@@ -540,6 +577,15 @@ export default {
     toggleExpand(p) {
       if (this.expandedId === p.id) this.expandedId = null;
       else this.expandedId = p.id;
+    },
+
+    toggleRankExpand(item) {
+      if (this.expandedRankIdx === item.idx) this.expandedRankIdx = null;
+      else this.expandedRankIdx = item.idx;
+    },
+
+    closeRankExpand() {
+      this.expandedRankIdx = null;
     },
 
     toggleSelect(p) {

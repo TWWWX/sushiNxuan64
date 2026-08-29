@@ -890,10 +890,18 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   background: #faf9f6;
 }
 .rank-content-cell {
-  cursor: default;
+  cursor: pointer;
   padding: 10px 12px;
 }
 .rank-content-cell:hover { background: #f5f8f4; }
+.rank-content-cell.open { background: #f5f8f4; }
+
+.rank-expand-row td.rank-expand-body {
+  padding: 10px 14px;
+  background: #fcfdfb;
+  border: 1px solid #dde7dd;
+  cursor: default;
+}
 
 .rank-poem-text {
   white-space: pre-line;
@@ -918,6 +926,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .rank-table .rank-col-votes { width: 56px; }
   .rank-table-scroll { max-height: calc(100vh - 140px); }
   .rank-content-cell { padding: 8px 10px; }
+  .rank-expand-row td.rank-expand-body { padding: 8px 10px; }
   .rank-poem-text { font-size: 12px; line-height: 1.6; }
   .rank-poem-text::first-line { font-size: 13px; }
 }
@@ -927,6 +936,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .rank-idx-cell { font-size: 12px; }
   .rank-votes-cell { font-size: 12px; }
   .rank-content-cell { padding: 6px 8px; }
+  .rank-expand-row td.rank-expand-body { padding: 6px 8px; }
   .rank-poem-text { font-size: 11px; line-height: 1.55; }
   .rank-poem-text::first-line { font-size: 12px; }
 }
