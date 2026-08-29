@@ -852,6 +852,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 .rank-table { width: 100%; table-layout: fixed; }
 .rank-table .rank-col-idx { width: 80px; }
 .rank-table .rank-col-content { width: auto; }
+.rank-table .rank-col-votes { width: 80px; }
 
 .rank-head-row th { } /* 继承通用 th */
 
@@ -861,6 +862,15 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   font-weight: 700;
   font-size: 13px;
   letter-spacing: 0;
+  vertical-align: middle;
+  cursor: default;
+  background: #faf9f6;
+}
+.rank-votes-cell {
+  text-align: center;
+  color: #4a7a52;
+  font-weight: 700;
+  font-size: 13px;
   vertical-align: middle;
   cursor: default;
   background: #faf9f6;
@@ -891,6 +901,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 @media (max-width: 899px) {
   .rank-wrapper { max-width: 100%; }
   .rank-table .rank-col-idx { width: 56px; }
+  .rank-table .rank-col-votes { width: 56px; }
   .rank-table-scroll { max-height: calc(100vh - 140px); }
   .rank-content-cell { padding: 8px 10px; }
   .rank-poem-text { font-size: 12px; line-height: 1.6; }
@@ -898,7 +909,9 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 }
 @media (max-width: 700px) {
   .rank-table .rank-col-idx { width: 44px; }
+  .rank-table .rank-col-votes { width: 44px; }
   .rank-idx-cell { font-size: 12px; }
+  .rank-votes-cell { font-size: 12px; }
   .rank-content-cell { padding: 6px 8px; }
   .rank-poem-text { font-size: 11px; line-height: 1.55; }
   .rank-poem-text::first-line { font-size: 12px; }

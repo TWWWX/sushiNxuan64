@@ -231,16 +231,18 @@
             <table class="rank-table">
               <thead>
                 <tr class="rank-head-row">
-                  <th class="rank-col-idx">序号</th>
+                  <th class="rank-col-idx">排名</th>
                   <th class="rank-col-content">诗文</th>
+                  <th class="rank-col-votes">得票数</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="item in rankList" :key="'rk' + item.idx" class="rank-row">
-                  <td class="rank-col-idx rank-idx-cell">{{ item.idx }}</td>
+                  <td class="rank-col-idx rank-idx-cell">{{ item.rank }}</td>
                   <td class="rank-col-content rank-content-cell">
                     <div class="rank-poem-text">{{ item.content }}</div>
                   </td>
+                  <td class="rank-col-votes rank-votes-cell">{{ item.votes }}</td>
                 </tr>
               </tbody>
             </table>
@@ -500,9 +502,17 @@ export default {
       const list = [];
       for (let i = start; i < rows.length; i++) {
         const r = rows[i] || [];
+        const votes = parseInt(r[0], 10) || 0;
         const content = (r[1] || '').trim();
         if (!content) continue;
-        list.push({ idx: list.length + 1, content });
+        list.push({ idx: list.length, votes, content });
+      }
+      list.sort((a, b) => b.votes - a.votes);
+      // 得票数相同的排名相同：排名 = 票数严格更多的条目数 + 1
+      for (let i = 0; i < list.length; i++) {
+        list[i].rank = (i > 0 && list[i].votes === list[i - 1].votes)
+          ? list[i - 1].rank
+          : i + 1;
       }
       this.rankList = list;
     },
