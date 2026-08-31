@@ -104,7 +104,7 @@
     const nextTheme = theme === 'dark' ? 'dark' : 'light';
     state.theme = nextTheme;
     document.body.dataset.theme = nextTheme;
-    const label = nextTheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+    const label = nextTheme === 'dark' ? '切换到浅色主题' : '切换到深色主题';
     elements.themeToggle.setAttribute('aria-label', label);
     elements.themeToggle.title = label;
     window.localStorage.setItem(storageKeys.theme, nextTheme);
@@ -114,10 +114,10 @@
     const hasSession = Boolean(state.workerUrl && state.isAuthenticated);
     const nextState = connectionState || (hasSession ? 'connected' : 'disconnected');
     const labels = {
-      connected: 'Connected',
-      disconnected: 'Not connected',
-      error: 'Connection issue',
-      loading: 'Connecting...',
+      connected: '已连接',
+      disconnected: '未连接',
+      error: '连接异常',
+      loading: '连接中...',
     };
 
     elements.sessionWorker.textContent = labels[nextState] || labels.disconnected;
@@ -239,7 +239,7 @@
 
   function closeAuthPrompt() {
     if (!state.workerUrl || !state.isAuthenticated) {
-      setAuthStatus('Worker URL and admin key are required.', true);
+      setAuthStatus('请填写 Worker 地址和管理密钥。', true);
       return;
     }
 
@@ -257,9 +257,9 @@
   }
 
   function confirmCommentAction(actionLabel, customMessage = '') {
-    const submitLabel = actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1);
+    const submitLabel = actionLabel;
     elements.confirmMessage.textContent =
-      customMessage || `Are you sure you want to ${actionLabel} this comment?`;
+      customMessage || `确定要${actionLabel}这条评论吗？`;
     elements.confirmSubmit.setAttribute('aria-label', submitLabel);
     elements.confirmSubmit.title = submitLabel;
     elements.confirmOverlay.hidden = false;
@@ -276,8 +276,8 @@
 
   function handleExpiredSession() {
     clearAdminSession({ clearWorkerUrl: false });
-    showAuthPrompt('Session expired. Enter the admin key again.');
-    setStatus('Session expired.', true);
+    showAuthPrompt('会话已过期，请重新输入管理密钥。');
+    setStatus('会话已过期。', true);
   }
 
   function setPanelCollapsed(button, collapsed) {
@@ -325,7 +325,7 @@
 
   function formatStatsDateLabel(value) {
     const date = parseDateInputValue(value);
-    if (!date) return 'Pick date';
+    if (!date) return '选择日期';
     return new Intl.DateTimeFormat([], {
       year: 'numeric',
       month: '2-digit',
@@ -386,7 +386,7 @@
 
   function updateStatsDatePicker() {
     elements.statsDateLabel.textContent = formatStatsDateLabel(state.statsStartDate);
-    elements.statsDateToggle.title = `Start date: ${elements.statsDateLabel.textContent}`;
+    elements.statsDateToggle.title = `开始日期：${elements.statsDateLabel.textContent}`;
     renderStatsDateCalendar();
   }
 
@@ -467,7 +467,7 @@
 
   function updateAuditDatePicker() {
     elements.auditDateLabel.textContent = formatStatsDateLabel(state.auditDate);
-    elements.auditDateToggle.title = `Log date: ${elements.auditDateLabel.textContent}`;
+    elements.auditDateToggle.title = `日志日期：${elements.auditDateLabel.textContent}`;
     renderAuditDateCalendar();
   }
 
@@ -519,7 +519,7 @@
   async function requestAdmin(path, options) {
     if (!state.workerUrl) {
       showAuthPrompt();
-      throw new Error('Worker URL is required.');
+      throw new Error('请填写 Worker 地址。');
     }
 
     const response = await fetch(endpoint(path), {
@@ -537,7 +537,7 @@
       if (response.status === 401) {
         handleExpiredSession();
       }
-      throw new Error(payload.error || `Request failed with ${response.status}.`);
+      throw new Error(payload.error || `请求失败（状态码 ${response.status}）。`);
     }
     state.isAuthenticated = true;
     return payload;
@@ -558,18 +558,18 @@
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
       if (response.status === 401 && payload.reason === 'missing_admin_key') {
-        throw new Error('The deployed Worker does not have ADMIN_API_KEY set. Run wrangler secret put ADMIN_API_KEY, paste your admin key, then try again.');
+        throw new Error('部署的 Worker 未设置 ADMIN_API_KEY。请执行 wrangler secret put ADMIN_API_KEY 并填入管理密钥后重试。');
       }
       if (response.status === 401 && payload.reason === 'admin_key_expired') {
         if (isLocalHttpWorkerUrl(state.workerUrl)) {
-          throw new Error('The local Worker says this admin key is expired. Run `npm run setup:dev` to reset .dev.vars, then restart `npm run dev`.');
+          throw new Error('本地 Worker 提示管理密钥已过期。请执行 `npm run setup:dev` 重置 .dev.vars，再重启 `npm run dev`。');
         }
-        throw new Error('The deployed Worker says this admin key is expired. Generate a new key or update ADMIN_API_KEY_EXPIRES_AT, then deploy again.');
+        throw new Error('部署的 Worker 提示管理密钥已过期。请生成新密钥或更新 ADMIN_API_KEY_EXPIRES_AT 后重新部署。');
       }
       if (response.status === 401 && payload.reason === 'invalid_admin_key') {
-        throw new Error('The admin key was rejected by the deployed Worker. Make sure you ran wrangler secret put ADMIN_API_KEY with the same key from your .env.');
+        throw new Error('管理密钥被 Worker 拒绝。请确认已执行 wrangler secret put ADMIN_API_KEY，且密钥与 .env 中一致。');
       }
-      throw new Error(payload.error || `Session request failed with ${response.status}.`);
+      throw new Error(payload.error || `会话请求失败（状态码 ${response.status}）。`);
     }
     return payload;
   }
@@ -654,7 +654,7 @@
     if (!state.deniedKeywords.length) {
       const item = document.createElement('li');
       item.className = 'keyword-popover-empty';
-      item.textContent = 'No denied keywords';
+      item.textContent = '暂无拒绝关键词';
       elements.keywordPopoverList.append(item);
       return;
     }
@@ -668,8 +668,8 @@
       button.className = 'keyword-popover-badge';
       button.classList.toggle('is-delete-pending', isPendingDelete);
       button.dataset.deniedKeyword = keyword;
-      button.setAttribute('aria-label', 'Delete Keyword');
-      button.title = 'Delete Keyword';
+      button.setAttribute('aria-label', '删除关键词');
+      button.title = '删除关键词';
       if (isPendingDelete) {
         button.append(createTrashIcon());
       } else {
@@ -691,10 +691,10 @@
     const points = stats.points || [];
     const bucketUnit = stats.bucketUnit || 'day';
     const series = [
-      { key: 'pageLikes', label: 'Page likes', color: 'var(--like-icon)' },
-      { key: 'commentLikes', label: 'Comment likes', color: 'var(--chart-comment-like)' },
-      { key: 'comments', label: 'Comments', color: 'var(--accent)' },
-      { key: 'moderationActions', label: 'Moderation', color: 'var(--pending-text)' },
+      { key: 'pageLikes', label: '页面点赞', color: 'var(--like-icon)' },
+      { key: 'commentLikes', label: '评论点赞', color: 'var(--chart-comment-like)' },
+      { key: 'comments', label: '评论', color: 'var(--accent)' },
+      { key: 'moderationActions', label: '审核操作', color: 'var(--pending-text)' },
     ];
 
     elements.statsLegend.replaceChildren();
@@ -711,7 +711,7 @@
     if (!points.length) {
       const empty = document.createElement('p');
       empty.className = 'empty-state';
-      empty.textContent = 'No trend data loaded.';
+      empty.textContent = '暂无趋势数据';
       elements.statsChart.append(empty);
       return;
     }
@@ -737,8 +737,8 @@
     svg.setAttribute(
       'aria-label',
       bucketUnit === 'hour'
-        ? 'Engagement trend for the current day'
-        : `Engagement trend for the last ${stats.rangeDays || points.length} days`
+        ? '当日互动趋势'
+        : `最近 ${stats.rangeDays || points.length} 天的互动趋势`
     );
 
     [0, 0.5, 1].forEach((ratio) => {
@@ -910,6 +910,17 @@
     elements.statsChart.append(svg, tooltip);
   }
 
+  const commentStatusLabels = {
+    pending: '待审核',
+    approved: '已通过',
+    hidden: '已隐藏',
+    rejected: '已拒绝',
+  };
+
+  function formatCommentStatus(status) {
+    return commentStatusLabels[status] || status;
+  }
+
   function makeStatusPill(status, label = status) {
     const pill = document.createElement('span');
     pill.className = `status-pill ${status}`;
@@ -983,7 +994,7 @@
   }
 
   function getPostDisplayTitle(pageTitle, path) {
-    const rawTitle = String(pageTitle || path || 'Untitled post').trim();
+    const rawTitle = String(pageTitle || path || '未命名页面').trim();
     const rawPath = String(path || '').trim();
     if (rawPath && rawTitle.endsWith(` (${rawPath})`)) {
       return rawTitle.slice(0, -(` (${rawPath})`).length);
@@ -1017,7 +1028,7 @@
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'post-title-copy-button';
-    button.setAttribute('aria-label', 'Copy post path');
+    button.setAttribute('aria-label', '复制页面路径');
 
     const label = document.createElement('span');
     label.className = 'post-title-label';
@@ -1028,19 +1039,19 @@
     tooltip.setAttribute('role', 'tooltip');
     const tooltipPath = document.createElement('span');
     tooltipPath.className = 'post-title-tooltip-path';
-    tooltipPath.textContent = postPath || 'No path available';
+    tooltipPath.textContent = postPath || '无路径';
     const tooltipHint = document.createElement('span');
     tooltipHint.className = 'post-title-tooltip-hint';
-    tooltipHint.textContent = 'Click to copy path';
+    tooltipHint.textContent = '点击复制路径';
     tooltip.append(tooltipPath, tooltipHint);
 
     button.append(label, tooltip);
     button.addEventListener('click', async () => {
       if (!postPath) return;
       await copyTextToClipboard(postPath);
-      tooltipHint.textContent = 'copied';
+      tooltipHint.textContent = '已复制';
       window.setTimeout(() => {
-        tooltipHint.textContent = 'Click to copy path';
+        tooltipHint.textContent = '点击复制路径';
       }, 1200);
     });
 
@@ -1065,7 +1076,7 @@
     const meta = document.createElement('div');
     meta.className = 'comment-meta';
     const author = document.createElement('span');
-    const authorLabel = `${comment.authorName || 'Anonymous'} #${comment.id}`;
+    const authorLabel = `${comment.authorName || '匿名'} #${comment.id}`;
     author.textContent = comment.authorIp ? `${authorLabel} · ${comment.authorIp}` : authorLabel;
     const createdAt = document.createElement('span');
     createdAt.textContent = formatDate(comment.createdAt);
@@ -1086,16 +1097,16 @@
     const commentLikes = Number(comment.likesCount || 0);
     const likeCount = document.createElement('span');
     likeCount.className = 'comment-like-count';
-    likeCount.textContent = formatCountLabel(commentLikes, 'like', 'likes');
+    likeCount.textContent = formatCountLabel(commentLikes, '赞', '赞');
     title.append(likeCount);
     commentSummary.append(
       requiresAttention
-        ? makeStatusPill('attention', 'Requires attention')
+        ? makeStatusPill('attention', '需要关注')
         : comment.inactive
-            ? makeStatusPill('inactive')
+            ? makeStatusPill('inactive', '已停用')
           : comment.hiddenAt
-            ? makeStatusPill('hidden')
-          : makeStatusPill(comment.status),
+            ? makeStatusPill('hidden', '已隐藏')
+          : makeStatusPill(comment.status, formatCommentStatus(comment.status)),
     );
     actions.append(commentSummary);
 
@@ -1104,7 +1115,7 @@
 
     const isRejected = comment.status === 'rejected';
     const approveButton = makeActionIconButton(
-      isRejected ? 'Restore comment' : 'Approve comment',
+      isRejected ? '恢复评论' : '通过评论',
       isRejected ? 'restore' : 'check',
       isRejected ? 'approve-action restore-action' : 'approve-action'
     );
@@ -1114,8 +1125,8 @@
       '',
       isRejected
         ? {
-            confirmLabel: 'restore',
-            confirmMessage: 'This comment includes a denied keyword. Are you sure you want to restore it?',
+            confirmLabel: '恢复',
+            confirmMessage: '该评论包含拒绝关键词，确定要恢复吗？',
           }
         : {}
     ));
@@ -1123,14 +1134,14 @@
     const isHidden = Boolean(comment.hiddenAt);
     const isDeleteAction = comment.status === 'approved' || isRejected;
     const rejectButton = makeActionIconButton(
-      isDeleteAction ? 'Delete comment' : 'Deny comment',
+      isDeleteAction ? '删除评论' : '拒绝评论',
       isDeleteAction ? 'trash' : 'x',
       isRejected ? 'delete-action rejected-delete-action' : isDeleteAction ? 'delete-action' : 'deny-action'
     );
     rejectButton.addEventListener('click', () => updateComment(
       comment.id,
       isDeleteAction ? 'delete' : 'reject',
-      comment.status === 'approved' ? 'delete' : isRejected ? '' : 'deny',
+      comment.status === 'approved' ? '删除' : isRejected ? '' : '拒绝',
       { hasReplies: hasReplies && comment.status === 'approved' }
     ));
 
@@ -1139,11 +1150,11 @@
     } else if (comment.inactive) {
       // Inactive comments inherit visibility from a missing or hidden parent.
     } else if (isHidden) {
-      const unhideButton = makeActionIconButton('Unhide approved comment', 'eye', 'unhide-action');
+      const unhideButton = makeActionIconButton('取消隐藏已通过评论', 'eye', 'unhide-action');
       unhideButton.addEventListener('click', () => updateComment(comment.id, 'unhide'));
       actionButtons.append(unhideButton);
     } else {
-      const hideButton = makeActionIconButton('Hide approved comment', 'eyeOff', 'hide-action');
+      const hideButton = makeActionIconButton('隐藏已通过评论', 'eyeOff', 'hide-action');
       hideButton.addEventListener('click', () => updateComment(comment.id, 'hide'));
       actionButtons.append(hideButton);
     }
@@ -1157,7 +1168,7 @@
   function renderComments(comments) {
     elements.commentList.replaceChildren();
     if (!comments.length) {
-      setEmpty(elements.commentList, 'No comments found.');
+      setEmpty(elements.commentList, '未找到评论');
       return;
     }
 
@@ -1262,7 +1273,7 @@
   function renderLikes(likes) {
     elements.likesList.replaceChildren();
     if (!likes.length) {
-      setEmpty(elements.likesList, 'No likes found.');
+      setEmpty(elements.likesList, '未找到点赞数据');
       return;
     }
     likes.forEach((like) => {
@@ -1274,9 +1285,9 @@
       const commentCount = Number(like.commentCount || 0);
       const commentLikeCount = Number(like.commentLikeCount || 0);
       count.textContent = [
-        formatCountLabel(Number(like.count || 0), 'post like', 'post likes'),
-        formatCountLabel(commentLikeCount, 'comment like', 'comment likes'),
-        formatCountLabel(commentCount, 'comment', 'comments'),
+        formatCountLabel(Number(like.count || 0), '页面点赞', '页面点赞'),
+        formatCountLabel(commentLikeCount, '评论点赞', '评论点赞'),
+        formatCountLabel(commentCount, '评论', '评论'),
       ].join(' · ');
       const updated = document.createElement('span');
       updated.textContent = formatDate(like.updatedAt);
@@ -1291,17 +1302,17 @@
 
   function updateLikesDirectionLabel() {
     const isMost = elements.likesDirection.dataset.direction !== 'asc';
-    const directionLabel = isMost ? 'Most' : 'Least';
+    const directionLabel = isMost ? '最多' : '最少';
     const iconPaths = isMost
       ? ['M7 17h10', 'M7 12h7', 'M7 7h4']
       : ['M7 7h10', 'M7 12h7', 'M7 17h4'];
 
     elements.likesDirection.classList.toggle('is-most', isMost);
     elements.likesDirection.classList.toggle('is-least', !isMost);
-    elements.likesDirection.title = `${directionLabel} first`;
+    elements.likesDirection.title = `${directionLabel}优先`;
     elements.likesDirection.setAttribute(
       'aria-label',
-      `${directionLabel} ${elements.likesSort.selectedOptions[0].textContent.toLowerCase()} first`
+      `按${elements.likesSort.selectedOptions[0].textContent}${directionLabel}优先`
     );
     elements.likesDirection.querySelectorAll('[data-likes-direction-icon]').forEach((path, index) => {
       path.setAttribute('d', iconPaths[index]);
@@ -1313,10 +1324,10 @@
 
     const infoItems = [
       ['URL', worker.workerUrl],
-      ['Name', worker.workerName || 'Not configured'],
-      ['Database', worker.databaseName || 'Not configured'],
-      ['Admin key expires', worker.adminKeyExpiresAt ? formatDate(worker.adminKeyExpiresAt) : 'Never'],
-      ['Origins', (worker.allowedOrigins || []).join(', ') || 'None configured'],
+      ['名称', worker.workerName || '未配置'],
+      ['数据库', worker.databaseName || '未配置'],
+      ['密钥过期时间', worker.adminKeyExpiresAt ? formatDate(worker.adminKeyExpiresAt) : '永不过期'],
+      ['允许来源', (worker.allowedOrigins || []).join(', ') || '未配置'],
     ];
 
     const infoList = document.createElement('ul');
@@ -1360,7 +1371,7 @@
     const informationDetails = document.createElement('details');
     informationDetails.className = 'worker-submenu';
     informationDetails.open = true;
-    const informationSummary = makeSubmenuSummary('Worker information');
+    const informationSummary = makeSubmenuSummary('Worker 信息');
     informationDetails.append(informationSummary, infoList);
     informationItem.append(informationDetails);
 
@@ -1371,9 +1382,9 @@
     cloudflareLink.href = 'https://dash.cloudflare.com/';
     cloudflareLink.target = '_blank';
     cloudflareLink.rel = 'noreferrer';
-    cloudflareLink.setAttribute('aria-label', 'Open Cloudflare dashboard');
+    cloudflareLink.setAttribute('aria-label', '打开 Cloudflare 控制台');
     const cloudflareLabel = document.createElement('span');
-    cloudflareLabel.textContent = 'Cloudflare dashboard';
+    cloudflareLabel.textContent = 'Cloudflare 控制台';
     const externalIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     externalIcon.setAttribute('viewBox', '0 0 24 24');
     externalIcon.setAttribute('fill', 'none');
@@ -1409,7 +1420,7 @@
   function renderAuditLogs(auditLogs) {
     elements.auditList.replaceChildren();
     if (!auditLogs.length) {
-      setEmpty(elements.auditList, 'No activity logs found.');
+      setEmpty(elements.auditList, '未找到操作日志');
       return;
     }
 
@@ -1437,8 +1448,8 @@
       const details = document.createElement('div');
       details.className = 'audit-details';
       details.textContent = [
-        log.adminKeyFingerprint ? `key ${log.adminKeyFingerprint}` : '',
-        log.clientIp ? `ip ${log.clientIp}` : '',
+        log.adminKeyFingerprint ? `密钥 ${log.adminKeyFingerprint}` : '',
+        log.clientIp ? `IP ${log.clientIp}` : '',
       ].filter(Boolean).join(' · ');
 
       item.append(meta, title);
@@ -1510,8 +1521,8 @@
     try {
       await loadComments();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Request failed.';
-      setStatus(state.isAuthenticated ? message : 'Session expired.', true);
+      const message = error instanceof Error ? error.message : '请求失败。';
+      setStatus(state.isAuthenticated ? message : '会话已过期。', true);
     }
   }
 
@@ -1519,8 +1530,8 @@
     try {
       await loadLikes();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Request failed.';
-      setStatus(state.isAuthenticated ? message : 'Session expired.', true);
+      const message = error instanceof Error ? error.message : '请求失败。';
+      setStatus(state.isAuthenticated ? message : '会话已过期。', true);
     }
   }
 
@@ -1528,7 +1539,7 @@
     try {
       await loadAuditLogs();
     } catch (error) {
-      setEmpty(elements.auditList, 'Activity logs are unavailable. Run the latest schema migration.');
+      setEmpty(elements.auditList, '操作日志不可用，请执行最新的 schema 迁移。');
     }
   }
 
@@ -1556,20 +1567,20 @@
     }
     if (destructiveLabel === 'delete' && options.hasReplies) {
       const confirmed = await confirmCommentAction(
-        'delete replies',
-        'This comment has replies. Deleting it will permanently delete those replies as well.'
+        '删除回复',
+        '该评论有回复，删除后将一并永久删除这些回复。'
       );
       if (!confirmed) return;
     }
 
     const statusVerb = action === 'approve'
-      ? 'Approving'
+      ? '正在通过'
       : action === 'delete'
-        ? 'Deleting'
+        ? '正在删除'
         : action === 'hide'
-          ? 'Hiding'
-        : 'Denying';
-    setStatus(`${statusVerb} comment #${id}...`);
+          ? '正在隐藏'
+        : '正在拒绝';
+    setStatus(`${statusVerb}评论 #${id}...`);
     await requestAdmin(`/admin/comments/${action}`, {
       method: 'POST',
       body: JSON.stringify({ id }),
@@ -1578,7 +1589,7 @@
   }
 
   async function updateCommentSettings(deniedKeywords, options = {}) {
-    setStatus('Saving comment settings...');
+    setStatus('正在保存评论设置...');
     const payload = await requestAdmin('/admin/comment-settings', {
       method: 'POST',
       body: JSON.stringify({ deniedKeywords }),
@@ -1594,7 +1605,7 @@
       setKeywordPopoverOpen(true);
       renderDeniedKeywordsPopover();
     }
-    setStatus('Comment settings saved.');
+    setStatus('评论设置已保存。');
     window.setTimeout(() => setStatus(''), 1800);
   }
 
@@ -1605,7 +1616,7 @@
       return;
     }
     if (keyword.length < 2) {
-      setStatus('Denied keywords must be at least 2 characters.', true);
+      setStatus('拒绝关键词至少需要 2 个字符。', true);
       elements.keywordPopoverInput.focus();
       return;
     }
@@ -1617,7 +1628,7 @@
       setKeywordPopoverOpen(true);
       elements.keywordPopoverInput.focus();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to save denied keyword.';
+      const message = error instanceof Error ? error.message : '无法保存拒绝关键词。';
       setStatus(message, true);
       setKeywordPopoverOpen(true);
       elements.keywordPopoverInput.focus();
@@ -1630,7 +1641,7 @@
       await updateCommentSettings(nextKeywords, { keepPopoverOpen: true });
       elements.keywordPopoverInput.focus();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to remove denied keyword.';
+      const message = error instanceof Error ? error.message : '无法删除拒绝关键词。';
       setStatus(message, true);
       setKeywordPopoverOpen(true);
       elements.keywordPopoverInput.focus();
@@ -1645,7 +1656,7 @@
     }
 
     setSessionWorker('loading');
-    setStatus('Loading...');
+    setStatus('正在加载...');
     try {
       const [summary, likes, worker] = await Promise.all([
         requestAdmin('/admin/summary'),
@@ -1667,20 +1678,20 @@
       setSessionWorker('connected');
       setStatus('');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Request failed.';
+      const message = error instanceof Error ? error.message : '请求失败。';
       setSessionWorker('error');
-      setStatus(state.isAuthenticated ? message : 'Session expired.', true);
+      setStatus(state.isAuthenticated ? message : '会话已过期。', true);
       if (!state.isAuthenticated) {
-        showAuthPrompt('Session expired. Enter the admin key again.');
+        showAuthPrompt('会话已过期，请重新输入管理密钥。');
       }
     }
   }
 
   async function restoreSessionAfterRefresh() {
-    setEmpty(elements.commentList, 'No comments loaded.');
-    setEmpty(elements.likesList, 'No likes loaded.');
-    setEmpty(elements.workerList, 'No worker loaded.');
-    setEmpty(elements.auditList, 'No activity logs loaded.');
+    setEmpty(elements.commentList, '评论未加载');
+    setEmpty(elements.likesList, '点赞数据未加载');
+    setEmpty(elements.workerList, 'Worker 信息未加载');
+    setEmpty(elements.auditList, '操作日志未加载');
     renderStatsChart({ rangeDays: 30, points: [] });
 
     if (!state.workerUrl) {
@@ -1693,13 +1704,13 @@
     // network request (verifyCookieSession also gates on canAttemptCookieSession).
     if (!canAttemptCookieSession(state.workerUrl)) {
       clearAdminSession({ clearWorkerUrl: true });
-      setStatus('Saved worker URL is not a secure session origin.', true);
-      showAuthPrompt('That worker URL is not allowed for secure sessions. Use https, or http://localhost, http://127.0.0.1, or http://[::1] for local development.');
+      setStatus('已保存的 Worker 地址不是安全的会话来源。', true);
+      showAuthPrompt('该 Worker 地址不允许用于安全会话。请使用 https，本地开发可用 http://localhost、http://127.0.0.1 或 http://[::1]。');
       return;
     }
 
     setSessionWorker('loading');
-    setStatus('Restoring session...');
+    setStatus('正在恢复会话...');
     if (await verifyCookieSession()) {
       state.isAuthenticated = true;
       await refreshAll();
@@ -1707,8 +1718,8 @@
     }
 
     clearAdminSession({ clearWorkerUrl: false });
-    setStatus('Session expired.', true);
-    showAuthPrompt('Session expired. Enter the admin key again.');
+    setStatus('会话已过期。', true);
+    showAuthPrompt('会话已过期，请重新输入管理密钥。');
   }
 
   elements.authForm.addEventListener('submit', async (event) => {
@@ -1717,25 +1728,25 @@
     const adminKey = elements.adminKey.value.trim();
 
     if (!workerUrl || !adminKey) {
-      setAuthStatus('Worker URL and admin key are required.', true);
+      setAuthStatus('请填写 Worker 地址和管理密钥。', true);
       return;
     }
 
     if (!canAttemptCookieSession(workerUrl)) {
-      setAuthStatus('Secure sessions require https. http is allowed only for localhost, 127.0.0.1, or [::1].', true);
+      setAuthStatus('安全会话需要 https。http 仅允许 localhost、127.0.0.1 或 [::1]。', true);
       elements.workerUrl.focus();
       return;
     }
 
     setSessionWorker('loading');
-    setAuthStatus('Creating secure session...');
+    setAuthStatus('正在创建安全会话...');
     try {
       state.workerUrl = workerUrl;
       state.isAuthenticated = false;
       const sessionPayload = await createAdminSession(workerUrl, adminKey, 'include');
 
       if (!sessionPayload?.authenticated || !(await verifyCookieSession(workerUrl))) {
-        throw new Error(`Session cookie was not accepted. Add ${window.location.origin} to ALLOWED_ORIGINS and redeploy the Worker.`);
+        throw new Error(`会话 Cookie 未被接受。请将 ${window.location.origin} 加入 Worker 的 ALLOWED_ORIGINS 环境变量后重新部署。`);
       }
 
       state.isAuthenticated = true;
@@ -1745,7 +1756,7 @@
       await refreshAll();
     } catch (error) {
       clearAdminSession({ clearWorkerUrl: false });
-      const message = error instanceof Error ? error.message : 'Unable to create session.';
+      const message = error instanceof Error ? error.message : '无法创建会话。';
       setSessionWorker('error');
       showAuthPrompt(message);
     }

@@ -1,25 +1,25 @@
 :root {
-  --bg: #f7f8fb;
+  --bg: #faf9f6;
   --surface: #ffffff;
-  --surface-muted: #f0f3f7;
-  --border: #d8dee8;
-  --text: #172033;
-  --muted: #657188;
-  --accent: #1463ff;
-  --accent-dark: #0d4fd1;
-  --danger: #b42318;
-  --danger-bg: #fff0ed;
-  --danger-hover: #8f1c13;
-  --danger-hover-bg: #ffe3dc;
-  --success: #157347;
-  --success-bg: #eaf7ef;
-  --success-hover: #0f5f38;
+  --surface-muted: #f5f8f4;
+  --border: #b8cdb8;
+  --text: #2c3e2c;
+  --muted: #7a877a;
+  --accent: #4a7a52;
+  --accent-dark: #2c3e2c;
+  --danger: #8b7373;
+  --danger-bg: #f5eded;
+  --danger-hover: #6e5a5a;
+  --danger-hover-bg: #ecdcdc;
+  --success: #4a7a52;
+  --success-bg: #eef4ec;
+  --success-hover: #2c3e2c;
   --like-icon: #c26a8d;
   --chart-comment-like: #9b6fd3;
-  --neutral-icon-hover: #3f4b61;
-  --shadow: 0 10px 28px rgba(23, 32, 51, 0.08);
-  --overlay: rgba(23, 32, 51, 0.45);
-  --focus: rgba(20, 99, 255, 0.18);
+  --neutral-icon-hover: #2c3e2c;
+  --shadow: 0 10px 28px rgba(44, 62, 44, 0.08);
+  --overlay: rgba(44, 62, 44, 0.45);
+  --focus: rgba(74, 122, 82, 0.18);
   --pending-text: #8a6100;
   --pending-bg: #fff7db;
 }
@@ -39,27 +39,27 @@ body {
 }
 
 body[data-theme="dark"] {
-  --bg: #111827;
-  --surface: #182235;
-  --surface-muted: #202c42;
-  --border: #344258;
-  --text: #edf2fb;
-  --muted: #a7b3c8;
-  --accent: #7aa7ff;
-  --accent-dark: #4d83eb;
-  --danger: #ff9b91;
-  --danger-bg: #3a2024;
-  --danger-hover: #ffb4ac;
-  --danger-hover-bg: #512429;
+  --bg: #17201a;
+  --surface: #1f2a22;
+  --surface-muted: #26332a;
+  --border: #3a4a3e;
+  --text: #e8ede8;
+  --muted: #9aa89c;
+  --accent: #7aa87f;
+  --accent-dark: #5d8a64;
+  --danger: #c99c9c;
+  --danger-bg: #3a2626;
+  --danger-hover: #d9b0b0;
+  --danger-hover-bg: #4a3030;
   --success: #7bdca6;
-  --success-bg: #173226;
+  --success-bg: #1a2f22;
   --success-hover: #9bf0bd;
   --like-icon: #e8a0c0;
   --chart-comment-like: #c6a7f2;
-  --neutral-icon-hover: #d8e1f2;
+  --neutral-icon-hover: #cfe0d2;
   --shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
-  --overlay: rgba(4, 8, 15, 0.72);
-  --focus: rgba(122, 167, 255, 0.24);
+  --overlay: rgba(8, 14, 10, 0.72);
+  --focus: rgba(122, 168, 127, 0.24);
   --pending-text: #f6d365;
   --pending-bg: #382d14;
   color-scheme: dark;
@@ -75,7 +75,7 @@ button {
   min-height: 34px;
   padding: 1px 12px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   color: var(--text);
   font-weight: 650;
@@ -89,7 +89,7 @@ button {
   min-height: 34px;
   padding: 1px 12px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   color: var(--text);
   font-weight: 650;
@@ -198,7 +198,7 @@ button:disabled {
 .package-chip {
   padding: 2px 5px;
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: 0;
   background: var(--surface-muted);
   color: var(--text);
   cursor: default;
@@ -221,7 +221,7 @@ button:disabled {
   min-width: 168px;
   padding: 8px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 0;
   background: var(--surface);
   box-shadow: var(--shadow);
   opacity: 0;
@@ -245,7 +245,7 @@ button:disabled {
   gap: 9px;
   min-height: 34px;
   padding: 7px 9px;
-  border-radius: 6px;
+  border-radius: 0;
   color: var(--muted);
   font-size: 0.88rem;
   font-weight: 700;
@@ -308,7 +308,7 @@ button.session-card {
 .connection-indicator {
   width: 9px;
   height: 9px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--danger);
   box-shadow: 0 0 0 3px var(--danger-bg);
 }
@@ -349,7 +349,7 @@ button.session-card {
   width: min(180px, calc(100vw - 32px));
   padding: 6px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   box-shadow: var(--shadow);
 }
@@ -403,7 +403,7 @@ button.session-card {
   min-height: 36px;
   padding: 7px 10px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   color: var(--text);
 }
@@ -570,7 +570,7 @@ body[data-theme="dark"] .success-button:hover:not(:disabled) {
   width: min(440px, 100%);
   padding: 22px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 0;
   background: var(--surface);
   box-shadow: 0 20px 60px rgba(23, 32, 51, 0.24);
 }
@@ -695,7 +695,7 @@ body.modal-open {
 .credit-divider {
   width: 5px;
   height: 5px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--border);
 }
 
@@ -714,7 +714,7 @@ body.modal-open {
   height: 40px;
   padding: 8px;
   border: none;
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
@@ -850,7 +850,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
   min-height: 92px;
   padding: 14px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   box-shadow: var(--shadow);
 }
@@ -948,7 +948,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
   display: inline-flex;
   padding: 2px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
 }
 
@@ -956,7 +956,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
   min-height: 28px;
   padding: 1px 8px;
   border: 0;
-  border-radius: 4px;
+  border-radius: 0;
   background: transparent;
   color: var(--muted);
   font-size: 0.78rem;
@@ -985,7 +985,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
   min-width: 154px;
   padding: 6px 10px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   color: var(--text);
   font-size: 0.82rem;
@@ -1022,7 +1022,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
   overflow: auto;
   padding: 12px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   box-shadow: var(--shadow);
 }
@@ -1077,7 +1077,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
   aspect-ratio: 1;
   min-width: 0;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 0;
   background: transparent;
   color: var(--text);
   font-size: 0.82rem;
@@ -1132,7 +1132,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
 .stats-chart-legend-item span {
   width: 9px;
   height: 9px;
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .stats-chart-body {
@@ -1209,7 +1209,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
   max-width: min(260px, calc(100% - 32px));
   padding: 10px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   box-shadow: var(--shadow);
   pointer-events: none;
@@ -1254,7 +1254,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
 .stats-chart-tooltip-swatch {
   width: 8px;
   height: 8px;
-  border-radius: 999px;
+  border-radius: 0;
   flex: 0 0 auto;
 }
 
@@ -1269,7 +1269,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
 .panel {
   min-width: 0;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   box-shadow: var(--shadow);
   overflow: hidden;
@@ -1445,7 +1445,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
   max-width: 180px;
   padding: 6px 8px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   color: var(--text);
 }
@@ -1472,7 +1472,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
   width: min(260px, calc(100vw - 32px));
   padding: 10px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   box-shadow: var(--shadow);
 }
@@ -1502,7 +1502,7 @@ body[data-theme="dark"] .theme-switch .theme-icon-moon {
   min-width: 0;
   padding: 6px 8px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   color: var(--text);
 }
@@ -1551,7 +1551,7 @@ button.keyword-popover-add:hover:not(:disabled) {
   min-width: 34px;
   padding: 3px 8px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface-muted);
   color: var(--muted);
   font: inherit;
@@ -1596,7 +1596,7 @@ button.keyword-popover-badge.is-delete-pending:hover:not(:disabled) {
 
 .keyword-popover li.keyword-popover-empty {
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface-muted);
   color: var(--muted);
   font-size: 0.78rem;
@@ -1740,7 +1740,7 @@ button.post-title-copy-button:hover:not(:disabled) {
   max-width: min(360px, calc(100vw - 48px));
   padding: 8px 10px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--surface);
   box-shadow: var(--shadow);
   color: var(--text);
@@ -1776,7 +1776,7 @@ button.post-title-copy-button:hover:not(:disabled) {
   align-items: center;
   min-height: 22px;
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface-muted);
   color: var(--muted);
   font-size: 0.78rem;
@@ -1915,7 +1915,7 @@ button.post-title-copy-button:hover:not(:disabled) {
   align-items: center;
   min-height: 24px;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface-muted);
   color: var(--muted);
   font-size: 0.78rem;

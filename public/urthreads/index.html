@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Urthreads Dashboard</title>
+  <title>评论管理后台</title>
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self' https: http://localhost:* http://127.0.0.1:* http://[::1]:*; base-uri 'none'; form-action 'self'; object-src 'none'; frame-src 'none';" />
   <meta name="referrer" content="no-referrer" />
   <link rel="icon" type="image/png" href="../assets/img/urthreads.png" />
   <link rel="apple-touch-icon" href="../assets/img/urthreads.png" />
-  <link rel="stylesheet" href="styles.css?v=120" />
+  <link rel="stylesheet" href="styles.css?v=121" />
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
       <div class="sidebar-header">
         <div class="brand-lockup">
-          <button type="button" class="brand-logo" data-logo-refresh aria-label="Refresh dashboard">
+          <button type="button" class="brand-logo" data-logo-refresh aria-label="刷新后台">
             <img src="../assets/img/urthreads.png" alt="" aria-hidden="true" />
           </button>
           <div class="brand">
@@ -34,16 +34,16 @@
                 </span>
               </span>
             </h1>
-            <p>Admin Dashboard</p>
+            <p>管理后台</p>
           </div>
         </div>
         <div class="session-menu" data-session-menu>
-          <button type="button" class="session-card" data-session-action data-session-card data-connection="disconnected" aria-label="Open session menu" aria-expanded="false" aria-controls="session-popover">
+          <button type="button" class="session-card" data-session-action data-session-card data-connection="disconnected" aria-label="打开会话菜单" aria-expanded="false" aria-controls="session-popover">
             <span class="session-card-label">
               <span class="connection-indicator" aria-hidden="true"></span>
-              Session
+              会话
             </span>
-            <strong data-session-worker>Not connected</strong>
+            <strong data-session-worker>未连接</strong>
             <div class="status-line" data-status></div>
           </button>
           <div id="session-popover" class="session-popover" data-session-popover hidden>
@@ -53,7 +53,7 @@
                 <path d="M16 17l5-5-5-5"></path>
                 <path d="M21 12H9"></path>
               </svg>
-              <span>Log out</span>
+              <span>退出登录</span>
             </button>
           </div>
         </div>
@@ -62,9 +62,9 @@
 
     <main class="main">
       <header class="topbar">
-        <h2>Overview</h2>
+        <h2>总览</h2>
         <div class="topbar-actions">
-          <button type="button" class="theme-switch" data-theme-toggle aria-label="Toggle theme" title="Toggle theme">
+          <button type="button" class="theme-switch" data-theme-toggle aria-label="切换主题" title="切换主题">
             <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="5"></circle>
               <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -80,23 +80,23 @@
               <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"></path>
             </svg>
           </button>
-          <button type="button" class="icon-button" data-refresh aria-label="Refresh" title="Refresh">
+          <button type="button" class="icon-button" data-refresh aria-label="刷新" title="刷新">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M21 12a9 9 0 11-2.64-6.36"></path>
               <path d="M21 3v6h-6"></path>
             </svg>
           </button>
-          <a class="icon-button" data-cloudflare-link href="https://dash.cloudflare.com/" target="_blank" rel="noreferrer" aria-label="Open Cloudflare dashboard" title="Open Cloudflare dashboard">
+          <a class="icon-button" data-cloudflare-link href="https://dash.cloudflare.com/" target="_blank" rel="noreferrer" aria-label="打开 Cloudflare 控制台" title="打开 Cloudflare 控制台">
             <img src="../assets/svg/cloudflare.svg" alt="" aria-hidden="true" />
           </a>
         </div>
       </header>
 
       <div class="overview-grid">
-        <section class="stats-grid" aria-label="Summary">
+        <section class="stats-grid" aria-label="汇总">
           <div class="stat">
             <div class="stat-copy">
-              <span>Page likes</span>
+              <span>页面点赞</span>
               <strong data-page-likes>0</strong>
             </div>
             <svg class="stat-icon page-likes-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -107,7 +107,7 @@
           </div>
           <div class="stat">
             <div class="stat-copy">
-              <span>Comment likes</span>
+              <span>评论点赞</span>
               <strong data-comment-likes>0</strong>
             </div>
             <svg class="stat-icon comment-likes-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -117,7 +117,7 @@
           </div>
           <div class="stat">
             <div class="stat-copy">
-              <span>Pending</span>
+              <span>待审核</span>
               <strong data-pending-comments>0</strong>
             </div>
             <svg class="stat-icon pending-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -127,7 +127,7 @@
           </div>
           <div class="stat">
             <div class="stat-copy">
-              <span>Approved</span>
+              <span>已通过</span>
               <strong data-approved-comments>0</strong>
             </div>
             <svg class="stat-icon approved-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -140,7 +140,7 @@
         <section class="panel stats-chart-panel" aria-labelledby="stats-chart-heading">
           <div class="panel-header stats-chart-header">
             <div class="panel-title-row">
-              <h3 id="stats-chart-heading">Engagement Trend</h3>
+              <h3 id="stats-chart-heading">互动趋势</h3>
             </div>
             <div class="stats-chart-legend" data-stats-legend></div>
           </div>
@@ -149,7 +149,7 @@
               <div class="stats-chart-filters">
                 <div class="stats-date-picker" data-stats-date-picker>
                   <button class="stats-date-button" type="button" data-stats-date-toggle aria-expanded="false" aria-controls="stats-date-popover">
-                    <span data-stats-date-label>Pick date</span>
+                    <span data-stats-date-label>选择日期</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M8 2v4"></path>
                       <path d="M16 2v4"></path>
@@ -159,35 +159,35 @@
                   </button>
                   <div class="stats-date-popover" id="stats-date-popover" data-stats-date-popover hidden>
                     <div class="stats-date-calendar-header">
-                      <button class="icon-button stats-date-nav" type="button" data-stats-date-prev aria-label="Previous month" title="Previous month">
+                      <button class="icon-button stats-date-nav" type="button" data-stats-date-prev aria-label="上个月" title="上个月">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                           <path d="M15 18l-6-6 6-6"></path>
                         </svg>
                       </button>
                       <div class="stats-date-month" data-stats-date-month></div>
-                      <button class="icon-button stats-date-nav" type="button" data-stats-date-next aria-label="Next month" title="Next month">
+                      <button class="icon-button stats-date-nav" type="button" data-stats-date-next aria-label="下个月" title="下个月">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                           <path d="M9 18l6-6-6-6"></path>
                         </svg>
                       </button>
                     </div>
                     <div class="stats-date-weekdays" aria-hidden="true">
-                      <span>Sun</span>
-                      <span>Mon</span>
-                      <span>Tue</span>
-                      <span>Wed</span>
-                      <span>Thu</span>
-                      <span>Fri</span>
-                      <span>Sat</span>
+                      <span>日</span>
+                      <span>一</span>
+                      <span>二</span>
+                      <span>三</span>
+                      <span>四</span>
+                      <span>五</span>
+                      <span>六</span>
                     </div>
                     <div class="stats-date-grid" data-stats-date-grid></div>
                   </div>
                 </div>
-                <div class="stats-chart-range" aria-label="Engagement trend range">
-                  <button type="button" data-stats-range="1d">1D</button>
-                  <button type="button" data-stats-range="7d">7D</button>
-                  <button type="button" data-stats-range="14d">14D</button>
-                  <button type="button" data-stats-range="30d" class="is-active">30D</button>
+                <div class="stats-chart-range" aria-label="互动趋势范围">
+                  <button type="button" data-stats-range="1d">1天</button>
+                  <button type="button" data-stats-range="7d">7天</button>
+                  <button type="button" data-stats-range="14d">14天</button>
+                  <button type="button" data-stats-range="30d" class="is-active">30天</button>
                 </div>
               </div>
             </div>
@@ -200,7 +200,7 @@
         <section class="panel" aria-labelledby="comments-heading" data-panel>
           <div class="panel-header">
             <div class="panel-title-row">
-              <h3 id="comments-heading">Comments</h3>
+              <h3 id="comments-heading">评论</h3>
             </div>
             <button
               class="panel-toggle"
@@ -208,8 +208,8 @@
               data-collapse-toggle
               aria-expanded="true"
               aria-controls="comments-panel-body"
-              aria-label="Collapse comments"
-              title="Collapse comments"
+              aria-label="收起评论"
+              title="收起评论"
             >
               <svg class="panel-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M6 9l6 6 6-6"></path>
@@ -226,8 +226,8 @@
                     data-keyword-popover-toggle
                     aria-expanded="false"
                     aria-controls="keyword-popover"
-                    aria-label="Show denied keywords"
-                    title="Denied keywords"
+                    aria-label="显示拒绝关键词"
+                    title="拒绝关键词"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <circle cx="12" cy="12" r="9"></circle>
@@ -235,10 +235,10 @@
                     </svg>
                   </button>
                   <div class="keyword-popover" id="keyword-popover" data-keyword-popover hidden>
-                    <div class="keyword-popover-title">Denied keywords</div>
+                    <div class="keyword-popover-title">拒绝关键词</div>
                     <form class="keyword-popover-form" data-keyword-popover-form>
-                      <input data-keyword-popover-input type="text" placeholder="Add keyword" minlength="2" />
-                      <button class="icon-button keyword-popover-add" type="submit" aria-label="Add denied keyword" title="Add denied keyword">
+                      <input data-keyword-popover-input type="text" placeholder="添加关键词" minlength="2" />
+                      <button class="icon-button keyword-popover-add" type="submit" aria-label="添加拒绝关键词" title="添加拒绝关键词">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                           <path d="M12 5v14"></path>
                           <path d="M5 12h14"></path>
@@ -249,11 +249,11 @@
                   </div>
                 </div>
                 <select data-comment-status>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="hidden">Hidden</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="all">All</option>
+                  <option value="pending">待审核</option>
+                  <option value="approved">已通过</option>
+                  <option value="hidden">已隐藏</option>
+                  <option value="rejected">已拒绝</option>
+                  <option value="all">全部</option>
                 </select>
                 <input data-comment-path type="text" placeholder="/path" />
                 <select data-comment-limit>
@@ -272,7 +272,7 @@
           <section class="panel" aria-labelledby="posts-heading" data-panel>
             <div class="panel-header">
               <div class="panel-title-row">
-                <h3 id="posts-heading">Posts</h3>
+                <h3 id="posts-heading">页面排行</h3>
               </div>
               <button
                 class="panel-toggle"
@@ -280,8 +280,8 @@
                 data-collapse-toggle
                 aria-expanded="true"
                 aria-controls="likes-panel-body"
-                aria-label="Collapse likes"
-                title="Collapse likes"
+                aria-label="收起点赞"
+                title="收起点赞"
               >
                 <svg class="panel-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M6 9l6 6 6-6"></path>
@@ -291,7 +291,7 @@
             <div class="panel-body" id="likes-panel-body" data-collapsible-body>
               <div class="panel-body-filters">
                 <div class="filters likes-filters">
-                  <button class="icon-button rank-toggle" type="button" data-likes-direction data-direction="desc" aria-label="Most relevance first" title="Most first">
+                  <button class="icon-button rank-toggle" type="button" data-likes-direction data-direction="desc" aria-label="按最多优先" title="最多优先">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path data-likes-direction-icon d="M7 17h10"></path>
                       <path data-likes-direction-icon d="M7 12h7"></path>
@@ -299,11 +299,11 @@
                     </svg>
                   </button>
                   <select data-likes-sort>
-                    <option value="relevance" selected>Relevance</option>
-                    <option value="likes">Likes</option>
-                    <option value="commentLikes">Comment likes</option>
-                    <option value="comments">Comments</option>
-                    <option value="recent">Recent</option>
+                    <option value="relevance" selected>相关性</option>
+                    <option value="likes">点赞</option>
+                    <option value="commentLikes">评论点赞</option>
+                    <option value="comments">评论数</option>
+                    <option value="recent">最近</option>
                   </select>
                   <input data-likes-path type="text" placeholder="/path" />
                   <select data-likes-limit>
@@ -321,7 +321,7 @@
           <section class="panel panel-spaced" aria-labelledby="audit-heading" data-panel>
             <div class="panel-header">
               <div class="panel-title-row">
-                <h3 id="audit-heading">Activity Logs</h3>
+                <h3 id="audit-heading">操作日志</h3>
               </div>
               <div class="panel-header-actions">
                 <button
@@ -330,8 +330,8 @@
                   data-collapse-toggle
                   aria-expanded="false"
                   aria-controls="audit-panel-body"
-                  aria-label="Expand activity logs"
-                  title="Expand activity logs"
+                  aria-label="展开操作日志"
+                  title="展开操作日志"
                 >
                   <svg class="panel-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M6 9l6 6 6-6"></path>
@@ -344,7 +344,7 @@
                 <div class="filters audit-filters">
                   <div class="stats-date-picker" data-audit-date-picker>
                     <button class="stats-date-button" type="button" data-audit-date-toggle aria-expanded="false" aria-controls="audit-date-popover">
-                      <span data-audit-date-label>Pick date</span>
+                      <span data-audit-date-label>选择日期</span>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M8 2v4"></path>
                         <path d="M16 2v4"></path>
@@ -354,13 +354,13 @@
                     </button>
                     <div class="stats-date-popover" id="audit-date-popover" data-audit-date-popover hidden>
                       <div class="stats-date-calendar-header">
-                        <button class="icon-button stats-date-nav" type="button" data-audit-date-prev aria-label="Previous month" title="Previous month">
+                        <button class="icon-button stats-date-nav" type="button" data-audit-date-prev aria-label="上个月" title="上个月">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M15 18l-6-6 6-6"></path>
                           </svg>
                         </button>
                         <div class="stats-date-month" data-audit-date-month></div>
-                        <button class="icon-button stats-date-nav" type="button" data-audit-date-next aria-label="Next month" title="Next month">
+                        <button class="icon-button stats-date-nav" type="button" data-audit-date-next aria-label="下个月" title="下个月">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M9 18l6-6-6-6"></path>
                           </svg>
@@ -378,8 +378,8 @@
                       <div class="stats-date-grid" data-audit-date-grid></div>
                     </div>
                   </div>
-                  <select data-audit-method aria-label="Activity log request type">
-                    <option value="all" selected>All requests</option>
+                  <select data-audit-method aria-label="日志请求类型">
+                    <option value="all" selected>全部请求</option>
                     <option value="GET">GET</option>
                     <option value="POST">POST</option>
                     <option value="PUT">PUT</option>
@@ -387,7 +387,7 @@
                     <option value="DELETE">DELETE</option>
                   </select>
                   <input data-audit-path type="text" placeholder="/path" />
-                  <select data-audit-limit aria-label="Activity log result count">
+                  <select data-audit-limit aria-label="日志条数">
                     <option value="25" selected>25</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
@@ -409,8 +409,8 @@
                 data-collapse-toggle
                 aria-expanded="false"
                 aria-controls="worker-panel-body"
-                aria-label="Expand worker"
-                title="Expand worker"
+                aria-label="展开 Worker 信息"
+                title="展开 Worker 信息"
               >
                 <svg class="panel-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M6 9l6 6 6-6"></path>
@@ -440,15 +440,15 @@
 
   <div class="auth-overlay" data-auth-overlay hidden>
     <form class="auth-dialog" data-auth-form role="dialog" aria-modal="true" aria-labelledby="auth-heading">
-      <button class="modal-close" type="button" data-auth-close aria-label="Close" title="Close">
+      <button class="modal-close" type="button" data-auth-close aria-label="关闭" title="关闭">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M18 6L6 18"></path>
           <path d="M6 6l12 12"></path>
         </svg>
       </button>
-      <h2 id="auth-heading">Connect dashboard</h2>
+      <h2 id="auth-heading">连接后台</h2>
       <div class="field">
-        <label for="worker-url">Worker URL</label>
+        <label for="worker-url">Worker 地址</label>
         <input
           id="worker-url"
           name="workerUrl"
@@ -460,7 +460,7 @@
       </div>
 
       <div class="field">
-        <label for="admin-key">Admin key</label>
+        <label for="admin-key">管理密钥</label>
         <input
           id="admin-key"
           name="adminKey"
@@ -471,14 +471,14 @@
       </div>
 
       <div class="auth-actions">
-        <button class="icon-button modal-action-button danger-action" type="button" data-end-session aria-label="End session" title="End session">
+        <button class="icon-button modal-action-button danger-action" type="button" data-end-session aria-label="结束会话" title="结束会话">
           <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path>
             <path d="M16 17l5-5-5-5"></path>
             <path d="M21 12H9"></path>
           </svg>
         </button>
-        <button class="icon-button modal-action-button primary-action" type="submit" aria-label="Connect" title="Connect">
+        <button class="icon-button modal-action-button primary-action" type="submit" aria-label="连接" title="连接">
           <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M20 6L9 17l-5-5"></path>
           </svg>
@@ -490,22 +490,22 @@
 
   <div class="confirm-overlay" data-confirm-overlay hidden>
     <form class="confirm-dialog" data-confirm-form role="dialog" aria-modal="true" aria-labelledby="confirm-heading">
-      <button class="modal-close" type="button" data-confirm-close aria-label="Close" title="Close">
+      <button class="modal-close" type="button" data-confirm-close aria-label="关闭" title="关闭">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M18 6L6 18"></path>
           <path d="M6 6l12 12"></path>
         </svg>
       </button>
-      <h2 id="confirm-heading">Confirm action</h2>
+      <h2 id="confirm-heading">确认操作</h2>
       <p data-confirm-message></p>
       <div class="confirm-actions">
-        <button class="icon-button modal-action-button neutral-action" type="button" data-confirm-cancel aria-label="Cancel" title="Cancel">
+        <button class="icon-button modal-action-button neutral-action" type="button" data-confirm-cancel aria-label="取消" title="取消">
           <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 6L6 18"></path>
             <path d="M6 6l12 12"></path>
           </svg>
         </button>
-        <button class="icon-button modal-action-button danger-action" type="submit" data-confirm-submit aria-label="Confirm" title="Confirm">
+        <button class="icon-button modal-action-button danger-action" type="submit" data-confirm-submit aria-label="确认" title="确认">
           <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M20 6L9 17l-5-5"></path>
           </svg>
@@ -513,6 +513,6 @@
       </div>
     </form>
   </div>
-  <script src="dashboard.js?v=69"></script>
+  <script src="dashboard.js?v=70"></script>
 </body>
 </html>
