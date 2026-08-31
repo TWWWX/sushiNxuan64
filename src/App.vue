@@ -305,7 +305,7 @@
                   <h4 class="comment-modal-title">填写身份信息</h4>
                   <form data-comment-identity-form class="comment-identity-form">
                     <input name="nickname" type="text" class="comment-input" placeholder="昵称（必填）" required maxlength="30" />
-                    <input name="email" type="email" class="comment-input" placeholder="邮箱（选填）" />
+                    <input name="email" type="email" class="comment-input" placeholder="邮箱（选填，仅供后台人员联系使用）" />
                     <input name="website" type="url" class="comment-input" placeholder="网站（选填）" />
                     <div class="comment-modal-actions">
                       <button type="button" class="comment-cancel-btn" data-comment-cancel>取消</button>

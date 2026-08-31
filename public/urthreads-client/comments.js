@@ -278,10 +278,18 @@
         throw new Error(`Failed to post comment: ${response.statusText}`);
       }
 
-      if (statusElement) {
-        statusElement.textContent = '评论已提交，等待审核后显示。';
+      let payload = {};
+      try {
+        payload = await response.json();
+      } catch (error) {
+        // Response body is optional; fall back to pending wording
       }
-      dispatchToast('评论已提交，等待审核后显示。', 'success', 2000);
+      const isApproved = payload.status === 'approved';
+      const successMessage = isApproved ? '评论已发表。' : '评论已提交，等待审核后显示。';
+      if (statusElement) {
+        statusElement.textContent = successMessage;
+      }
+      dispatchToast(successMessage, 'success', 2000);
       return true;
     } catch (error) {
       console.error('[Comments] Failed to submit comment:', error);
