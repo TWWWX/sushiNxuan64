@@ -13,7 +13,13 @@
 
       <div class="author-note-wrapper">
         <div class="author-note-bar"></div>
-        <div class="author-note-box"></div>
+        <div class="author-note-box">游戏玩法：从库中那么多苏轼作品中，选出你最喜欢或认为最有代表性的64篇，制作成“我心目中的苏轼诗文TOP64”表格。
+制作完成后，点击“上传CSV”即可参与排行榜票数统计。
+
+技术支持：蟋蟀 丨 诗文筛汇：娴菜无敌 蟋蟀
+欢迎关注公众号「东坡墙」QQ「3301590656」
+
+点开全文能看到的“编者备注”中，有部分译文、背景介绍等复制于网络，如有疏漏，还请见谅。</div>
       </div>
 
       <div class="entry-cards">
