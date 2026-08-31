@@ -48,6 +48,29 @@
   }
 
   /**
+   * localStorage helpers: prevent repeat comment likes from the same browser
+   */
+  function getCommentLikedKey(commentId) {
+    return `${config.endpoint}:comment-liked:${commentId}`;
+  }
+
+  function isCommentLiked(commentId) {
+    try {
+      return window.localStorage.getItem(getCommentLikedKey(commentId)) === 'true';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function setCommentLiked(commentId) {
+    try {
+      window.localStorage.setItem(getCommentLikedKey(commentId), 'true');
+    } catch (error) {
+      // Likes still work without localStorage
+    }
+  }
+
+  /**
    * Create a comment element with reply and like actions
    */
   function makeComment(comment, onReply, onLike, depth = 0) {
@@ -60,7 +83,7 @@
 
     const meta = document.createElement('p');
     meta.className = 'comment-meta';
-    const author = comment.authorName || 'Anonymous';
+    const author = comment.authorName || '匿名';
     const createdAt = formatCommentDate(comment.createdAt);
     meta.textContent = createdAt ? `${author} · ${createdAt}` : author;
 
@@ -74,7 +97,10 @@
     const likeButton = document.createElement('button');
     likeButton.type = 'button';
     likeButton.className = 'comment-like-button';
-    likeButton.textContent = `Like (${comment.likesCount || 0})`;
+    const commentLiked = isCommentLiked(comment.id);
+    likeButton.textContent = `赞 (${comment.likesCount || 0})`;
+    likeButton.classList.toggle('is-liked', commentLiked);
+    likeButton.disabled = commentLiked;
     likeButton.addEventListener('click', () => {
       if (onLike) onLike(comment, likeButton);
     });
@@ -82,7 +108,7 @@
     const replyButton = document.createElement('button');
     replyButton.type = 'button';
     replyButton.className = 'comment-reply-button';
-    replyButton.textContent = 'Reply';
+    replyButton.textContent = '回复';
     replyButton.addEventListener('click', () => {
       if (onReply) onReply(comment);
     });
@@ -115,7 +141,7 @@
    * Fetch approved comments from endpoint
    */
   async function loadComments(endpoint, pageId, listElement, statusElement, onReply, onLike) {
-    listElement.textContent = 'Loading comments...';
+    listElement.textContent = '正在加载评论...';
 
     try {
       const url = new URL(endpoint);
@@ -139,7 +165,7 @@
       if (comments.length === 0) {
         const empty = document.createElement('p');
         empty.className = 'comment-empty';
-        empty.textContent = 'There are no comments for this post yet.';
+        empty.textContent = '还没有人评论，来抢沙发吧。';
         listElement.append(empty);
         return;
       }
@@ -151,7 +177,7 @@
       console.error('[Comments] Failed to load comments:', error);
       listElement.textContent = '';
       if (statusElement) {
-        statusElement.textContent = 'Comments could not load right now.';
+        statusElement.textContent = '评论加载失败，请稍后重试。';
         statusElement.classList.add('is-error');
       }
     }
@@ -174,7 +200,7 @@
     submitButton
   ) {
     if (statusElement) {
-      statusElement.textContent = 'Posting your comment...';
+      statusElement.textContent = '正在提交评论...';
       statusElement.classList.remove('is-error');
     }
     if (submitButton) submitButton.disabled = true;
@@ -203,13 +229,13 @@
       }
 
       if (statusElement) {
-        statusElement.textContent = 'Thanks. Your comment is awaiting approval.';
+        statusElement.textContent = '评论已提交，等待审核后显示。';
       }
       return true;
     } catch (error) {
       console.error('[Comments] Failed to submit comment:', error);
       if (statusElement) {
-        statusElement.textContent = 'Your comment could not be posted right now.';
+        statusElement.textContent = '评论提交失败，请稍后重试。';
         statusElement.classList.add('is-error');
       }
       return false;
@@ -220,6 +246,7 @@
 
   async function likeComment(comment, button, statusElement) {
     if (!comment || !comment.id) return;
+    if (isCommentLiked(comment.id)) return;
 
     if (button) {
       button.disabled = true;
@@ -245,16 +272,17 @@
       if (payload?.likes != null) {
         comment.likesCount = Number(payload.likes);
         if (button) {
-          button.textContent = `Like (${comment.likesCount})`;
+          button.textContent = `赞 (${comment.likesCount})`;
+          button.classList.add('is-liked');
+          setCommentLiked(comment.id);
         }
       }
     } catch (error) {
       console.error('[Comments] Failed to like comment:', error);
       if (statusElement) {
-        statusElement.textContent = 'Unable to like the comment right now.';
+        statusElement.textContent = '评论点赞失败，请稍后重试。';
         statusElement.classList.add('is-error');
       }
-    } finally {
       if (button) {
         button.disabled = false;
       }
@@ -288,7 +316,7 @@
 
     const setReplyTarget = (comment) => {
       replyTargetId = comment.id;
-      setStatus(`Replying to ${comment.authorName}. Your reply will require approval.`);
+      setStatus(`正在回复 ${comment.authorName}，回复需审核后显示。`);
       contentField?.focus();
     };
 

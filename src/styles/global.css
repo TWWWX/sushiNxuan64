@@ -1037,6 +1037,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 .comment-like-button:hover,
 .comment-reply-button:hover { color: #2c3e2c; text-decoration: underline; }
 .comment-like-button:disabled { cursor: default; opacity: 0.6; }
+.comment-like-button.is-liked { color: #4a7a52; font-weight: 700; }
 .comment-replies { margin-top: 8px; }
 .comment-empty {
   color: #7a877a;
@@ -1061,7 +1062,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   min-height: 80px;
   padding: 10px 12px;
   border: 1px solid #b8cdb8;
-  border-radius: 4px;
+  border-radius: 0;
   background: #fff;
   color: #2c3e2c;
   font-family: inherit;
@@ -1118,7 +1119,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #b8cdb8;
-  border-radius: 4px;
+  border-radius: 0;
   background: #fff;
   color: #2c3e2c;
   font-family: inherit;
