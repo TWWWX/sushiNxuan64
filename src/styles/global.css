@@ -878,6 +878,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   letter-spacing: 0;
   vertical-align: middle;
   cursor: default;
+  pointer-events: none;
   background: #faf9f6;
 }
 .rank-votes-cell {
@@ -887,6 +888,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   font-size: 13px;
   vertical-align: middle;
   cursor: default;
+  pointer-events: none;
   background: #faf9f6;
 }
 .rank-content-cell {

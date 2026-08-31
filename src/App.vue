@@ -246,7 +246,7 @@
               <tbody>
                 <template v-for="item in rankList" :key="'rk' + item.idx">
                   <tr class="rank-row">
-                    <td class="rank-col-idx rank-idx-cell" @click="closeRankExpand">{{ item.rank }}</td>
+                    <td class="rank-col-idx rank-idx-cell">{{ item.rank }}</td>
                     <td
                       class="rank-col-content rank-content-cell"
                       :class="{ open: expandedRankIdx === item.idx }"
@@ -254,7 +254,7 @@
                     >
                       <div class="rank-poem-text">{{ item.content }}</div>
                     </td>
-                    <td class="rank-col-votes rank-votes-cell" @click="closeRankExpand">{{ item.votes }}</td>
+                    <td class="rank-col-votes rank-votes-cell">{{ item.votes }}</td>
                   </tr>
                   <tr v-if="expandedRankIdx === item.idx" :key="'rkex' + item.idx" class="rank-expand-row">
                     <td colspan="3" class="rank-expand-body">
@@ -274,7 +274,7 @@
           <div class="rank-urthreads">
             <div class="rank-like-bar">
               <button class="rank-like-btn" data-like-button data-path="/ranking">
-                <span class="like-label">赞</span>
+                <span class="like-label">为苏轼点赞</span>
                 <span class="like-count" data-like-count>0</span>
               </button>
             </div>
@@ -293,7 +293,7 @@
               <div class="comment-list-wrap" data-comment-list></div>
               <div class="comment-status" data-comment-status></div>
               <form class="comment-draft-form" data-comment-draft-form>
-                <textarea name="content" class="comment-textarea" placeholder="写下你的评论…" required></textarea>
+                <textarea name="content" class="comment-textarea" placeholder="写下你的评论…" required maxlength="500"></textarea>
                 <button type="submit" class="comment-send-btn" data-comment-send>发表评论</button>
               </form>
               <div class="comment-modal" data-comment-modal hidden>
