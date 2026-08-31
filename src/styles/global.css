@@ -940,3 +940,224 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   .rank-poem-text { font-size: 11px; line-height: 1.55; }
   .rank-poem-text::first-line { font-size: 12px; }
 }
+
+/* ==================== 排行榜：urthreads 点赞 + 评论区 ==================== */
+.rank-urthreads {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px dashed #b8cdb8;
+}
+
+/* 页面点赞按钮 */
+.rank-like-bar { display: flex; justify-content: center; margin-bottom: 20px; }
+.rank-like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 24px;
+  border: 1px solid #4a7a52;
+  border-radius: 4px;
+  background: #faf9f6;
+  color: #2c3e2c;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.rank-like-btn:hover { background: #f5f8f4; border-color: #2c3e2c; }
+.rank-like-btn.is-liked {
+  background: #4a7a52;
+  color: #fff;
+  border-color: #2c3e2c;
+}
+.rank-like-btn:disabled { cursor: default; opacity: 0.85; }
+.rank-like-btn .like-count { font-weight: 700; min-width: 16px; text-align: center; }
+
+/* 评论区容器 */
+.rank-comments {
+  background: #faf9f6;
+  border: 1px dashed #b8cdb8;
+  padding: 16px 20px;
+}
+.comments-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.comments-section-header .title-deco-bar {
+  width: 4px;
+  height: 18px;
+  background: #2c3e2c;
+  flex-shrink: 0;
+}
+.comments-section-title {
+  font-size: 15px;
+  color: #2c3e2c;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+/* 评论列表（由 comments.js 动态生成） */
+.comment-list-wrap { margin-bottom: 14px; }
+.comment-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #e8ede8;
+}
+.comment-item:last-child { border-bottom: none; }
+.comment-reply { margin-left: 1.5rem; }
+.comment-meta {
+  font-size: 12px;
+  color: #7a877a;
+  margin-bottom: 4px;
+}
+.comment-body {
+  font-size: 13px;
+  color: #2c3e2c;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.comment-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+.comment-like-button,
+.comment-reply-button {
+  border: none;
+  background: transparent;
+  color: #4a7a52;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 0;
+  transition: color 0.2s ease;
+}
+.comment-like-button:hover,
+.comment-reply-button:hover { color: #2c3e2c; text-decoration: underline; }
+.comment-like-button:disabled { cursor: default; opacity: 0.6; }
+.comment-replies { margin-top: 8px; }
+.comment-empty {
+  color: #7a877a;
+  font-size: 13px;
+  padding: 12px 0;
+  text-align: center;
+}
+
+/* 状态信息 */
+.comment-status {
+  font-size: 12px;
+  color: #7a877a;
+  margin-bottom: 10px;
+  min-height: 16px;
+}
+.comment-status.is-error { color: #8b7373; }
+
+/* 评论表单 */
+.comment-draft-form { display: flex; flex-direction: column; gap: 10px; }
+.comment-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px 12px;
+  border: 1px solid #b8cdb8;
+  border-radius: 4px;
+  background: #fff;
+  color: #2c3e2c;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.7;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.comment-textarea:focus { outline: none; border-color: #4a7a52; }
+.comment-send-btn {
+  align-self: flex-end;
+  padding: 8px 24px;
+  border: 1px solid #4a7a52;
+  border-radius: 4px;
+  background: #4a7a52;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.comment-send-btn:hover { background: #2c3e2c; border-color: #2c3e2c; }
+.comment-send-btn:disabled { background: #b8cdb8; border-color: #b8cdb8; cursor: default; }
+
+/* 身份弹窗 */
+.comment-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.comment-modal[hidden] { display: none; }
+.comment-modal-box {
+  background: #faf9f6;
+  border: 1px solid #b8cdb8;
+  border-radius: 6px;
+  padding: 24px;
+  width: 90%;
+  max-width: 360px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.comment-modal-title {
+  font-size: 15px;
+  color: #2c3e2c;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+.comment-identity-form { display: flex; flex-direction: column; gap: 10px; }
+.comment-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #b8cdb8;
+  border-radius: 4px;
+  background: #fff;
+  color: #2c3e2c;
+  font-family: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.comment-input:focus { outline: none; border-color: #4a7a52; }
+.comment-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+.comment-cancel-btn,
+.comment-submit-btn {
+  padding: 8px 18px;
+  border: 1px solid #b8cdb8;
+  border-radius: 4px;
+  background: #fff;
+  color: #2c3e2c;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.comment-cancel-btn:hover { background: #f5f8f4; }
+.comment-submit-btn {
+  background: #4a7a52;
+  color: #fff;
+  border-color: #4a7a52;
+}
+.comment-submit-btn:hover { background: #2c3e2c; border-color: #2c3e2c; }
+
+/* 手机端 */
+@media (max-width: 899px) {
+  .rank-urthreads { margin-top: 14px; padding-top: 12px; }
+  .rank-comments { padding: 12px 14px; }
+  .comments-section-title { font-size: 14px; }
+  .comment-body { font-size: 12px; }
+  .comment-textarea { font-size: 12px; min-height: 64px; }
+  .comment-modal-box { padding: 18px; }
+}

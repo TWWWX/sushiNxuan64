@@ -269,11 +269,52 @@
               </tbody>
             </table>
           </div>
+
+          <!-- 页面点赞 + 评论区（urthreads） -->
+          <div class="rank-urthreads">
+            <div class="rank-like-bar">
+              <button class="rank-like-btn" data-like-button data-path="/ranking">
+                <span class="like-label">赞</span>
+                <span class="like-count" data-like-count>0</span>
+              </button>
+            </div>
+
+            <div
+              class="rank-comments"
+              data-worker-comments
+              data-page-id="/ranking"
+              :data-page-url="rankPageUrl"
+              data-page-title="苏轼诗文封神榜"
+            >
+              <div class="comments-section-header">
+                <div class="title-deco-bar"></div>
+                <h3 class="comments-section-title">留言评论</h3>
+              </div>
+              <div class="comment-list-wrap" data-comment-list></div>
+              <div class="comment-status" data-comment-status></div>
+              <form class="comment-draft-form" data-comment-draft-form>
+                <textarea name="content" class="comment-textarea" placeholder="写下你的评论…" required></textarea>
+                <button type="submit" class="comment-send-btn" data-comment-send>发表评论</button>
+              </form>
+              <div class="comment-modal" data-comment-modal hidden>
+                <div class="comment-modal-box">
+                  <h4 class="comment-modal-title">填写身份信息</h4>
+                  <form data-comment-identity-form class="comment-identity-form">
+                    <input name="nickname" type="text" class="comment-input" placeholder="昵称（必填）" required maxlength="30" />
+                    <input name="email" type="email" class="comment-input" placeholder="邮箱（选填）" />
+                    <input name="website" type="url" class="comment-input" placeholder="网站（选填）" />
+                    <div class="comment-modal-actions">
+                      <button type="button" class="comment-cancel-btn" data-comment-cancel>取消</button>
+                      <button type="submit" class="comment-submit-btn">提交评论</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-
-    <!-- 真人自证弹窗：首次点击任何上传按钮时弹出；内容写入CSV首行 -->
     <div v-if="showAuthModal" class="auth-mask" @click.self="cancelAuthModal">
       <div class="auth-box">
         <h3 class="auth-title">请证明你是人类</h3>
@@ -485,7 +526,17 @@ export default {
         grid.push(row);
       }
       return grid;
+    },
+    rankPageUrl() {
+      return window.location.href;
     }
+  },
+  watch: {
+    mode(val) {
+      if (val === 'rank') {
+        this.$nextTick(() => { this.initUrthreads(); });
+      }
+    },
   },
   mounted() {
     this.initPoems();
@@ -557,6 +608,10 @@ export default {
       this.rankList = list;
     },
     forceRerender() { this.$forceUpdate(); },
+    initUrthreads() {
+      if (window.LikesModule) window.LikesModule.initLikeButtons();
+      if (window.CommentsModule) window.CommentsModule.initComments();
+    },
     hashToMode() {
       const h = window.location.hash;
       // hash 为空（'' 或 仅 '#'）时默认显示首页（mode = null → v-if="!mode" 展示 homepage）
