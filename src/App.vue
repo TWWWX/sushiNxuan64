@@ -294,6 +294,10 @@
               <div class="comment-status" data-comment-status></div>
               <form class="comment-draft-form" data-comment-draft-form>
                 <textarea name="content" class="comment-textarea" placeholder="写下你的评论…" required maxlength="500"></textarea>
+                <div class="comment-identity-bar" data-comment-identity-bar hidden>
+                  <span class="comment-identity-name" data-comment-identity-name></span>
+                  <button type="button" class="comment-identity-edit" data-comment-identity-edit>修改</button>
+                </div>
                 <button type="submit" class="comment-send-btn" data-comment-send>发表评论</button>
               </form>
               <div class="comment-modal" data-comment-modal hidden>

@@ -1048,6 +1048,27 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   text-align: center;
 }
 .comment-list-wrap .comment-loading { font-size: 12px; }
+.comment-identity-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: #7a877a;
+}
+.comment-identity-bar[hidden] { display: none; }
+.comment-identity-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.comment-identity-edit {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: #4a7a52;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 2px 0;
+  cursor: pointer;
+}
+.comment-identity-edit:hover { color: #2c3e2c; text-decoration: underline; }
 
 /* 状态信息 */
 .comment-status {

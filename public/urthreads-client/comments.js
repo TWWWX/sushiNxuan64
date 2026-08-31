@@ -48,6 +48,39 @@
   }
 
   /**
+   * localStorage helpers: remember commenter identity so the nickname is
+   * only asked once (editable later via the identity bar)
+   */
+  function getIdentityKey() {
+    return `${config.endpoint}:comment-identity`;
+  }
+
+  function getSavedIdentity() {
+    try {
+      const raw = window.localStorage.getItem(getIdentityKey());
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      const nickname = String(data?.nickname || '').trim();
+      if (!nickname) return null;
+      return {
+        nickname,
+        email: String(data?.email || '').trim(),
+        website: String(data?.website || '').trim(),
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function saveIdentity(identity) {
+    try {
+      window.localStorage.setItem(getIdentityKey(), JSON.stringify(identity));
+    } catch (error) {
+      // Identity persistence is best-effort; commenting still works without it
+    }
+  }
+
+  /**
    * localStorage helpers: prevent repeat comment likes from the same browser
    */
   function getCommentLikedKey(commentId) {
@@ -356,8 +389,44 @@
       return;
     }
 
-    // Modal controls
-    const openModal = () => {
+    const modalTitle = modal.querySelector('.comment-modal-title');
+    const identitySubmitButton = identityForm.querySelector('button[type="submit"]');
+    const identityBar = section.querySelector('[data-comment-identity-bar]');
+    const identityName = section.querySelector('[data-comment-identity-name]');
+    const identityEditButton = section.querySelector('[data-comment-identity-edit]');
+
+    // Modal controls. mode 'comment': identity dialog opened before posting;
+    // mode 'identity': user edits their saved identity without posting.
+    let modalMode = 'comment';
+
+    const fillIdentityForm = () => {
+      const identity = getSavedIdentity();
+      if (!identity) return;
+      if (nicknameField) nicknameField.value = identity.nickname;
+      const emailField = identityForm.elements.email;
+      const websiteField = identityForm.elements.website;
+      if (emailField) emailField.value = identity.email;
+      if (websiteField) websiteField.value = identity.website;
+    };
+
+    const renderIdentityBar = () => {
+      const identity = getSavedIdentity();
+      if (!identityBar) return;
+      identityBar.hidden = !identity;
+      if (identity && identityName) {
+        identityName.textContent = `以「${identity.nickname}」身份发表`;
+      }
+    };
+
+    const openModal = (mode = 'comment') => {
+      modalMode = mode;
+      fillIdentityForm();
+      if (modalTitle) {
+        modalTitle.textContent = mode === 'identity' ? '修改身份信息' : '填写身份信息';
+      }
+      if (identitySubmitButton) {
+        identitySubmitButton.textContent = mode === 'identity' ? '保存' : '提交评论';
+      }
       modal.hidden = false;
       document.body.classList.add('comment-modal-open');
       window.setTimeout(() => nicknameField?.focus(), 0);
@@ -387,26 +456,7 @@
       updateSendButton();
     });
 
-    draftForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      pendingContent = contentField?.value.trim() || '';
-      if (!pendingContent) return;
-      setStatus('');
-      openModal();
-    });
-
-    // Identity form (nickname/email) handlers
-    identityForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-
-      const formData = new FormData(identityForm);
-      const submitButton = identityForm.querySelector('button[type="submit"]');
-      const nickname = String(formData.get('nickname') || '').trim();
-      const email = String(formData.get('email') || '').trim();
-      const website = String(formData.get('website') || '').trim();
-
-      if (!nickname || !pendingContent) return;
-
+    const submitWithIdentity = async (nickname, email, website) => {
       const success = await submitComment(
         config.endpoint,
         pageId,
@@ -418,7 +468,7 @@
         pendingContent,
         replyTargetId,
         status,
-        submitButton
+        identitySubmitButton
       );
 
       if (success) {
@@ -432,6 +482,49 @@
         closeModal();
         await loadComments(config.endpoint, pageId, list, status, setReplyTarget, handleLike);
       }
+    };
+
+    draftForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      pendingContent = contentField?.value.trim() || '';
+      if (!pendingContent) return;
+      setStatus('');
+      const identity = getSavedIdentity();
+      if (identity) {
+        submitWithIdentity(identity.nickname, identity.email, identity.website);
+      } else {
+        openModal('comment');
+      }
+    });
+
+    // Identity form (nickname/email) handlers
+    identityForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(identityForm);
+      const nickname = String(formData.get('nickname') || '').trim();
+      const email = String(formData.get('email') || '').trim();
+      const website = String(formData.get('website') || '').trim();
+
+      if (!nickname) return;
+
+      // Persist immediately so a failed post does not lose the identity
+      saveIdentity({ nickname, email, website });
+      renderIdentityBar();
+
+      if (modalMode === 'comment' && pendingContent) {
+        await submitWithIdentity(nickname, email, website);
+      } else {
+        identityForm.reset();
+        closeModal();
+        setStatus('身份信息已保存。');
+      }
+    });
+
+    // Identity bar edit handler
+    identityEditButton?.addEventListener('click', () => {
+      setStatus('');
+      openModal('identity');
     });
 
     // Modal close handlers
@@ -444,6 +537,7 @@
     loadComments(config.endpoint, pageId, list, status, setReplyTarget, handleLike);
     resizeCommentField(contentField);
     updateSendButton();
+    renderIdentityBar();
   }
 
   /**
