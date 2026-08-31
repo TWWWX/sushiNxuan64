@@ -524,6 +524,7 @@
 
     const response = await fetch(endpoint(path), {
       ...options,
+      cache: 'no-store',
       credentials: 'include',
       headers: {
         Accept: 'application/json',
@@ -1586,6 +1587,15 @@
       body: JSON.stringify({ id }),
     });
     await refreshAll();
+    const doneVerb = action === 'approve'
+      ? '已通过'
+      : action === 'delete'
+        ? '已删除'
+        : action === 'hide'
+          ? '已隐藏'
+        : '已拒绝';
+    setStatus(`评论 #${id} ${doneVerb}。`);
+    window.setTimeout(() => setStatus(''), 1800);
   }
 
   async function updateCommentSettings(deniedKeywords, options = {}) {
@@ -1658,22 +1668,25 @@
     setSessionWorker('loading');
     setStatus('正在加载...');
     try {
-      const [summary, likes, worker] = await Promise.all([
-        requestAdmin('/admin/summary'),
-        loadLikes(),
-        requestAdmin('/admin/worker').then(async (workerPayload) => {
-          try {
-            await loadCommentSettings();
-          } catch (error) {
-            state.deniedKeywords = [];
-          }
-          return workerPayload;
-        }),
+      // Each sub-request is guarded so a single failure cannot abort the whole
+      // refresh; the comment list in particular must always re-render.
+      await Promise.all([
+        requestAdmin('/admin/summary').then(renderSummary).catch(() => {}),
+        safeLoadLikes(),
+        requestAdmin('/admin/worker')
+          .then(async (workerPayload) => {
+            try {
+              await loadCommentSettings();
+            } catch (error) {
+              state.deniedKeywords = [];
+            }
+            return workerPayload;
+          })
+          .then(renderWorker)
+          .catch(() => {}),
       ]);
-      renderSummary(summary);
-      renderWorker(worker);
+      await safeLoadComments();
       await safeLoadStats();
-      await loadComments();
       await safeLoadAuditLogs();
       setSessionWorker('connected');
       setStatus('');
