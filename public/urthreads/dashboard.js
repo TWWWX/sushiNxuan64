@@ -1065,7 +1065,8 @@
     const meta = document.createElement('div');
     meta.className = 'comment-meta';
     const author = document.createElement('span');
-    author.textContent = `${comment.authorName || 'Anonymous'} #${comment.id}`;
+    const authorLabel = `${comment.authorName || 'Anonymous'} #${comment.id}`;
+    author.textContent = comment.authorIp ? `${authorLabel} · ${comment.authorIp}` : authorLabel;
     const createdAt = document.createElement('span');
     createdAt.textContent = formatDate(comment.createdAt);
     meta.append(author, createdAt);
