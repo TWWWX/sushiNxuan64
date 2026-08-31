@@ -141,7 +141,11 @@
    * Fetch approved comments from endpoint
    */
   async function loadComments(endpoint, pageId, listElement, statusElement, onReply, onLike) {
-    listElement.textContent = '正在加载评论...';
+    listElement.replaceChildren();
+    const loading = document.createElement('p');
+    loading.className = 'comment-empty comment-loading';
+    loading.textContent = '正在加载评论...';
+    listElement.append(loading);
 
     try {
       const url = new URL(endpoint);
@@ -180,6 +184,19 @@
         statusElement.textContent = '评论加载失败，请稍后重试。';
         statusElement.classList.add('is-error');
       }
+    }
+  }
+
+  /**
+   * Dispatch a lightweight toast feedback event consumed by App.vue showToast
+   */
+  function dispatchToast(text, type, duration) {
+    try {
+      window.dispatchEvent(new CustomEvent('rank-comment-toast', {
+        detail: { text, type, duration },
+      }));
+    } catch (error) {
+      // Toast is optional feedback; ignore environments without CustomEvent
     }
   }
 
@@ -231,6 +248,7 @@
       if (statusElement) {
         statusElement.textContent = '评论已提交，等待审核后显示。';
       }
+      dispatchToast('评论已提交，等待审核后显示。', 'success', 2000);
       return true;
     } catch (error) {
       console.error('[Comments] Failed to submit comment:', error);
@@ -238,6 +256,7 @@
         statusElement.textContent = '评论提交失败，请稍后重试。';
         statusElement.classList.add('is-error');
       }
+      dispatchToast('评论提交失败，请稍后重试。', 'error', 3000);
       return false;
     } finally {
       if (submitButton) submitButton.disabled = false;

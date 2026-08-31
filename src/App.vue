@@ -544,12 +544,14 @@ export default {
     this.mode = this.hashToMode();
     window.addEventListener('hashchange', this.handleHashChange);
     window.addEventListener('resize', this.forceRerender);
+    window.addEventListener('rank-comment-toast', this.onCommentToast);
     this.refreshRandomPoem();
     this._ensureDeviceId(); // 页面加载即进行双重备份同步/恢复/生成
   },
   beforeDestroy() {
     window.removeEventListener('hashchange', this.handleHashChange);
     window.removeEventListener('resize', this.forceRerender);
+    window.removeEventListener('rank-comment-toast', this.onCommentToast);
     window.removeEventListener('mousemove', this.onMouseMove);
     window.removeEventListener('mouseup', this.onMouseUp);
   },
@@ -702,6 +704,12 @@ export default {
         this.toast.show = false;
         this._toastTimer = null;
       }, duration);
+    },
+    // 评论区（comments.js）派发的轻反馈事件
+    onCommentToast(event) {
+      const detail = event.detail || {};
+      if (!detail.text) return;
+      this.showToast(detail.text, detail.type || 'success', detail.duration || 2000);
     },
 
     // ===================== 工具 =====================

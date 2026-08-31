@@ -1047,6 +1047,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   padding: 12px 0;
   text-align: center;
 }
+.comment-list-wrap .comment-loading { font-size: 12px; }
 
 /* 状态信息 */
 .comment-status {
@@ -1078,7 +1079,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
   align-self: flex-end;
   padding: 8px 24px;
   border: 1px solid #4a7a52;
-  border-radius: 4px;
+  border-radius: 0;
   background: #4a7a52;
   color: #fff;
   font-family: inherit;
@@ -1104,7 +1105,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 .comment-modal-box {
   background: #faf9f6;
   border: 1px solid #b8cdb8;
-  border-radius: 6px;
+  border-radius: 0;
   padding: 24px;
   width: 90%;
   max-width: 360px;
@@ -1139,7 +1140,7 @@ td.empty:hover { background: #faf9f6; border-color: #dde7dd; }
 .comment-submit-btn {
   padding: 8px 18px;
   border: 1px solid #b8cdb8;
-  border-radius: 4px;
+  border-radius: 0;
   background: #fff;
   color: #2c3e2c;
   font-family: inherit;
