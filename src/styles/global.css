@@ -21,6 +21,26 @@ body {
 .homepage { animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+/* 竹子装饰：仅首页渲染（App.vue 中 v-if 控制），位于背景之上、内容之下 */
+.bamboo {
+  position: fixed;
+  left: 30%;
+  top: 33.33%;
+  height: 46.67vh;
+  width: auto;
+  transform: translateX(-50%);
+  z-index: -1;
+  pointer-events: none;
+  user-select: none;
+}
+@media (max-width: 700px) {
+  .bamboo {
+    left: 42%;
+    top: 50%;
+    height: 21.43vh;
+  }
+}
+
 .home-header { text-align: center; margin-bottom: 40px; }
 .home-title-row {
   display: flex;
