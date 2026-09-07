@@ -27,6 +27,7 @@
   const config = {
     endpoint: window.LIKES_CONFIG?.endpoint || '',
     storagePrefix: window.LIKES_CONFIG?.storagePrefix || 'liked:',
+    siteId: window.LIKES_CONFIG?.siteId || 'n64',
   };
 
   if (!config.endpoint) {
@@ -88,6 +89,7 @@
   async function requestLikes(path, options = {}) {
     const url = new URL(config.endpoint);
     url.searchParams.set('path', path);
+    url.searchParams.set('siteId', config.siteId);
 
     const response = await fetch(url, {
       headers: {

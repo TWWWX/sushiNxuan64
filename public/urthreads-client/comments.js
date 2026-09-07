@@ -24,6 +24,7 @@
   // Configuration
   const config = {
     endpoint: window.COMMENTS_CONFIG?.endpoint || '',
+    siteId: window.COMMENTS_CONFIG?.siteId || 'n64',
   };
 
   if (!config.endpoint) {
@@ -183,6 +184,7 @@
     try {
       const url = new URL(endpoint);
       url.searchParams.set('path', pageId);
+      url.searchParams.set('siteId', config.siteId);
 
       const response = await fetch(url, {
         headers: {
@@ -263,6 +265,7 @@
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          siteId: config.siteId,
           path: pageId,
           pageUrl,
           pageTitle,
@@ -316,6 +319,7 @@
       const url = new URL(config.endpoint);
       url.pathname = url.pathname.replace(/\/$/, '') + '/like';
       url.searchParams.set('commentId', comment.id);
+      url.searchParams.set('siteId', config.siteId);
 
       const response = await fetch(url.toString(), {
         method: 'POST',
