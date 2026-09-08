@@ -68,6 +68,12 @@ body {
   margin-top: 10px;
 }
 
+/* 链接样式与合成大苏轼一致：统一 #666 */
+a:link,
+a:visited,
+a:active,
+a:hover { color: #666; }
+
 .author-note-wrapper {
   display: flex;
   max-width: 640px;
@@ -89,8 +95,9 @@ body {
   line-height: 2;
   letter-spacing: 1px;
   white-space: pre-wrap;
-  text-align: center;
+  text-align: left;
 }
+.author-note-box > span { width: 100%; }
 
 .entry-cards {
   display: flex;
