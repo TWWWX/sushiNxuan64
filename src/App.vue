@@ -547,8 +547,13 @@ export default {
   mounted() {
     this.initPoems();
     this.initRank();
+    // URL 停留在 #/ 或 #（主页）时清理为无 hash 的干净地址
+    if (window.location.hash === '#' || window.location.hash === '#/') {
+      history.replaceState(null, '', location.pathname + location.search);
+    }
     this.mode = this.hashToMode();
     window.addEventListener('hashchange', this.handleHashChange);
+    window.addEventListener('popstate', this.handleHashChange);
     window.addEventListener('resize', this.forceRerender);
     window.addEventListener('rank-comment-toast', this.onCommentToast);
     this.refreshRandomPoem();
@@ -556,6 +561,7 @@ export default {
   },
   beforeDestroy() {
     window.removeEventListener('hashchange', this.handleHashChange);
+    window.removeEventListener('popstate', this.handleHashChange);
     window.removeEventListener('resize', this.forceRerender);
     window.removeEventListener('rank-comment-toast', this.onCommentToast);
     window.removeEventListener('mousemove', this.onMouseMove);
@@ -638,7 +644,11 @@ export default {
     switchMode(m) {
       if (m === '64') window.location.hash = '/nxuan64';
       else if (m === 'rank') window.location.hash = '/ranking';
-      else window.location.hash = '/';
+      else {
+        // 回主页：直接移除 URL 中的 hash（pushState 不触发 hashchange，手动同步 mode）
+        history.pushState(null, '', location.pathname + location.search);
+        this.mode = null;
+      }
     },
 
     isSelected(id) { return this.selectedIdsOrder.indexOf(id) !== -1; },
